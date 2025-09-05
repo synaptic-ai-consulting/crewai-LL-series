@@ -21,6 +21,119 @@ This demo demonstrates the strategic decision-making framework between CrewAI Fl
 - **Use Case**: Enterprise systems requiring both control and creativity
 - **Characteristics**: Optimal balance, scalable, maintainable
 
+## Architecture & Flow Diagram
+
+The following diagram illustrates how users interact with each approach and how LLMs are invoked:
+
+```mermaid
+graph TB
+    %% User Interaction Layer
+    User[👤 User] --> CLI[`run_demo.py`<br/>Command Line Interface]
+    CLI --> DemoRunner[`LightningLesson1Demo`<br/>Orchestration Engine]
+    
+    %% Three Solution Paths
+    DemoRunner --> CrewPath[🔄 Crew-Only Path]
+    DemoRunner --> FlowPath[📋 Flow-Only Path]
+    DemoRunner --> HybridPath[🎯 Hybrid Path]
+    
+    %% Crew-Only Architecture
+    subgraph CrewOnly["🔄 Crew-Only (Autonomous)"]
+        CrewPath --> CrewDemo[`CrewOnlyDemo`]
+        CrewDemo --> CrewAgents[`CrewAI Agents`<br/>Writer + Reviewer]
+        CrewAgents --> CrewLLM1[`🤖 LLM Call`<br/>Writer Agent]
+        CrewAgents --> CrewLLM2[`🤖 LLM Call`<br/>Reviewer Agent]
+        CrewLLM1 --> CrewOutput[`artifacts/crew_only_output.md`]
+        CrewLLM2 --> CrewOutput
+    end
+    
+    %% Flow-Only Architecture
+    subgraph FlowOnly["📋 Flow-Only (Structured)"]
+        FlowPath --> FlowDemo[`FlowOnlyDemo`]
+        FlowDemo --> FlowSteps[`Sequential Flow Steps`]
+        FlowSteps --> Step1[`1. Initialize Topic`]
+        FlowSteps --> Step2[`2. Create Outline`]
+        FlowSteps --> Step3[`3. Draft Content`]
+        FlowSteps --> Step4[`4. Compliance Review`]
+        FlowSteps --> Step5[`5. Finalize Content`]
+        
+        Step1 --> FlowLLM1[`🤖 LLM Call`<br/>Topic Initialization]
+        Step2 --> FlowLLM2[`🤖 LLM Call`<br/>Outline Generation]
+        Step3 --> FlowLLM3[`🤖 LLM Call`<br/>Content Drafting]
+        Step4 --> FlowLLM4[`🤖 LLM Call`<br/>Compliance Review]
+        Step5 --> FlowLLM5[`🤖 LLM Call`<br/>Content Finalization]
+        
+        FlowLLM1 --> FlowOutput[`artifacts/flow_only_output.md`]
+        FlowLLM2 --> FlowOutput
+        FlowLLM3 --> FlowOutput
+        FlowLLM4 --> FlowOutput
+        FlowLLM5 --> FlowOutput
+    end
+    
+    %% Hybrid Architecture
+    subgraph Hybrid["🎯 Hybrid (Orchestrated + Collaborative)"]
+        HybridPath --> HybridDemo[`HybridFlowDemo`]
+        HybridDemo --> HybridFlow[`Flow Orchestration`]
+        HybridDemo --> MiniCrew[`Mini Crew Collaboration`]
+        
+        HybridFlow --> HStep1[`1. Initialize Topic`]
+        HybridFlow --> HStep2[`2. Create Outline`]
+        HybridFlow --> HStep3[`3. Collaborative Draft`]
+        HybridFlow --> HStep4[`4. Compliance Review`]
+        HybridFlow --> HStep5[`5. Finalize Content`]
+        
+        HStep1 --> HybridLLM1[`🤖 LLM Call`<br/>Topic Initialization]
+        HStep2 --> HybridLLM2[`🤖 LLM Call`<br/>Outline Generation]
+        
+        HStep3 --> MiniCrew
+        MiniCrew --> MiniWriter[`Mini Writer Agent`]
+        MiniCrew --> MiniReviewer[`Mini Reviewer Agent`]
+        MiniWriter --> HybridLLM3[`🤖 LLM Call`<br/>Collaborative Writing]
+        MiniReviewer --> HybridLLM4[`🤖 LLM Call`<br/>Collaborative Review]
+        
+        HStep4 --> HybridLLM5[`🤖 LLM Call`<br/>Compliance Review]
+        HStep5 --> HybridLLM6[`🤖 LLM Call`<br/>Content Finalization]
+        
+        HybridLLM1 --> HybridOutput[`artifacts/hybrid_flow_output.md`]
+        HybridLLM2 --> HybridOutput
+        HybridLLM3 --> HybridOutput
+        HybridLLM4 --> HybridOutput
+        HybridLLM5 --> HybridOutput
+        HybridLLM6 --> HybridOutput
+    end
+    
+    %% Output Collection
+    CrewOutput --> Results[`📊 Demo Results`]
+    FlowOutput --> Results
+    HybridOutput --> Results
+    Results --> JSONOutput[`artifacts/ll1_demo_results_*.json`]
+    
+    %% Styling
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef crewClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef flowClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef hybridClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    
+    class User,CLI userClass
+    class CrewDemo,CrewAgents crewClass
+    class FlowDemo,FlowSteps,Step1,Step2,Step3,Step4,Step5 flowClass
+    class HybridDemo,HybridFlow,MiniCrew,MiniWriter,MiniReviewer hybridClass
+    class CrewLLM1,CrewLLM2,FlowLLM1,FlowLLM2,FlowLLM3,FlowLLM4,FlowLLM5,HybridLLM1,HybridLLM2,HybridLLM3,HybridLLM4,HybridLLM5,HybridLLM6 llmClass
+    class CrewOutput,FlowOutput,HybridOutput,Results,JSONOutput outputClass
+```
+
+### Key Architectural Differences
+
+| Aspect | Crew-Only | Flow-Only | Hybrid |
+|--------|-----------|-----------|--------|
+| **Control** | Agent autonomy | Step-by-step control | Orchestrated with collaboration |
+| **LLM Calls** | Agent-driven | Direct function calls | Mixed approach |
+| **Predictability** | Low | High | Medium-High |
+| **Creativity** | High | Low | Medium-High |
+| **Auditability** | Low | High | High |
+| **Scalability** | Limited | High | High |
+
 ## Quick Start
 
 ### Prerequisites
