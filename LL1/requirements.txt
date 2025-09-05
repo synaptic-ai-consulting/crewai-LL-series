@@ -1,0 +1,4 @@
+crewai==0.102.0
+pydantic==2.11.7
+openai==1.106.0
+python-dotenv==1.1.1
