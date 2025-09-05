@@ -21,107 +21,164 @@ This demo demonstrates the strategic decision-making framework between CrewAI Fl
 - **Use Case**: Enterprise systems requiring both control and creativity
 - **Characteristics**: Optimal balance, scalable, maintainable
 
-## Architecture & Flow Diagram
+## Architecture & Flow Diagrams
 
-The following diagram illustrates how users interact with each approach and how LLMs are invoked:
+The following diagrams illustrate how users interact with each approach and how LLMs are invoked. Each solution is shown separately for clarity:
+
+### 1. Crew-Only (Autonomous) Architecture
 
 ```mermaid
 graph TB
-    %% User Interaction Layer
+    %% User Interaction
     User[👤 User] --> CLI[`run_demo.py`<br/>Command Line Interface]
     CLI --> DemoRunner[`LightningLesson1Demo`<br/>Orchestration Engine]
     
-    %% Three Solution Paths
-    DemoRunner --> CrewPath[🔄 Crew-Only Path]
-    DemoRunner --> FlowPath[📋 Flow-Only Path]
-    DemoRunner --> HybridPath[🎯 Hybrid Path]
+    %% Crew-Only Path
+    DemoRunner --> CrewDemo[`CrewOnlyDemo`]
+    CrewDemo --> CrewAgents[`CrewAI Agents`<br/>Writer + Reviewer]
     
-    %% Crew-Only Architecture
-    subgraph CrewOnly["🔄 Crew-Only (Autonomous)"]
-        CrewPath --> CrewDemo[`CrewOnlyDemo`]
-        CrewDemo --> CrewAgents[`CrewAI Agents`<br/>Writer + Reviewer]
-        CrewAgents --> CrewLLM1[`🤖 LLM Call`<br/>Writer Agent]
-        CrewAgents --> CrewLLM2[`🤖 LLM Call`<br/>Reviewer Agent]
-        CrewLLM1 --> CrewOutput[`artifacts/crew_only_output.md`]
-        CrewLLM2 --> CrewOutput
-    end
+    %% Agent Collaboration
+    CrewAgents --> Writer[`Writer Agent`]
+    CrewAgents --> Reviewer[`Reviewer Agent`]
     
-    %% Flow-Only Architecture
-    subgraph FlowOnly["📋 Flow-Only (Structured)"]
-        FlowPath --> FlowDemo[`FlowOnlyDemo`]
-        FlowDemo --> FlowSteps[`Sequential Flow Steps`]
-        FlowSteps --> Step1[`1. Initialize Topic`]
-        FlowSteps --> Step2[`2. Create Outline`]
-        FlowSteps --> Step3[`3. Draft Content`]
-        FlowSteps --> Step4[`4. Compliance Review`]
-        FlowSteps --> Step5[`5. Finalize Content`]
-        
-        Step1 --> FlowLLM1[`🤖 LLM Call`<br/>Topic Initialization]
-        Step2 --> FlowLLM2[`🤖 LLM Call`<br/>Outline Generation]
-        Step3 --> FlowLLM3[`🤖 LLM Call`<br/>Content Drafting]
-        Step4 --> FlowLLM4[`🤖 LLM Call`<br/>Compliance Review]
-        Step5 --> FlowLLM5[`🤖 LLM Call`<br/>Content Finalization]
-        
-        FlowLLM1 --> FlowOutput[`artifacts/flow_only_output.md`]
-        FlowLLM2 --> FlowOutput
-        FlowLLM3 --> FlowOutput
-        FlowLLM4 --> FlowOutput
-        FlowLLM5 --> FlowOutput
-    end
+    %% LLM Calls
+    Writer --> WriterLLM[`🤖 LLM Call`<br/>Content Generation]
+    Reviewer --> ReviewerLLM[`🤖 LLM Call`<br/>Content Review]
     
-    %% Hybrid Architecture
-    subgraph Hybrid["🎯 Hybrid (Orchestrated + Collaborative)"]
-        HybridPath --> HybridDemo[`HybridFlowDemo`]
-        HybridDemo --> HybridFlow[`Flow Orchestration`]
-        HybridDemo --> MiniCrew[`Mini Crew Collaboration`]
-        
-        HybridFlow --> HStep1[`1. Initialize Topic`]
-        HybridFlow --> HStep2[`2. Create Outline`]
-        HybridFlow --> HStep3[`3. Collaborative Draft`]
-        HybridFlow --> HStep4[`4. Compliance Review`]
-        HybridFlow --> HStep5[`5. Finalize Content`]
-        
-        HStep1 --> HybridLLM1[`🤖 LLM Call`<br/>Topic Initialization]
-        HStep2 --> HybridLLM2[`🤖 LLM Call`<br/>Outline Generation]
-        
-        HStep3 --> MiniCrew
-        MiniCrew --> MiniWriter[`Mini Writer Agent`]
-        MiniCrew --> MiniReviewer[`Mini Reviewer Agent`]
-        MiniWriter --> HybridLLM3[`🤖 LLM Call`<br/>Collaborative Writing]
-        MiniReviewer --> HybridLLM4[`🤖 LLM Call`<br/>Collaborative Review]
-        
-        HStep4 --> HybridLLM5[`🤖 LLM Call`<br/>Compliance Review]
-        HStep5 --> HybridLLM6[`🤖 LLM Call`<br/>Content Finalization]
-        
-        HybridLLM1 --> HybridOutput[`artifacts/hybrid_flow_output.md`]
-        HybridLLM2 --> HybridOutput
-        HybridLLM3 --> HybridOutput
-        HybridLLM4 --> HybridOutput
-        HybridLLM5 --> HybridOutput
-        HybridLLM6 --> HybridOutput
-    end
-    
-    %% Output Collection
-    CrewOutput --> Results[`📊 Demo Results`]
-    FlowOutput --> Results
-    HybridOutput --> Results
-    Results --> JSONOutput[`artifacts/ll1_demo_results_*.json`]
+    %% Output
+    WriterLLM --> CrewOutput[`artifacts/crew_only_output.md`]
+    ReviewerLLM --> CrewOutput
     
     %% Styling
     classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     classDef crewClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef flowClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef hybridClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
     classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px
     classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
     
-    class User,CLI userClass
-    class CrewDemo,CrewAgents crewClass
-    class FlowDemo,FlowSteps,Step1,Step2,Step3,Step4,Step5 flowClass
-    class HybridDemo,HybridFlow,MiniCrew,MiniWriter,MiniReviewer hybridClass
-    class CrewLLM1,CrewLLM2,FlowLLM1,FlowLLM2,FlowLLM3,FlowLLM4,FlowLLM5,HybridLLM1,HybridLLM2,HybridLLM3,HybridLLM4,HybridLLM5,HybridLLM6 llmClass
-    class CrewOutput,FlowOutput,HybridOutput,Results,JSONOutput outputClass
+    class User,CLI,DemoRunner userClass
+    class CrewDemo,CrewAgents,Writer,Reviewer crewClass
+    class WriterLLM,ReviewerLLM llmClass
+    class CrewOutput outputClass
 ```
+
+**Key Characteristics:**
+- **High Autonomy**: Agents work independently with minimal control
+- **Collaborative**: Writer and Reviewer agents work together
+- **Unpredictable**: Output varies based on agent interactions
+- **Creative**: Maximum freedom for innovative solutions
+
+### 2. Flow-Only (Structured) Architecture
+
+```mermaid
+graph TB
+    %% User Interaction
+    User[👤 User] --> CLI[`run_demo.py`<br/>Command Line Interface]
+    CLI --> DemoRunner[`LightningLesson1Demo`<br/>Orchestration Engine]
+    
+    %% Flow-Only Path
+    DemoRunner --> FlowDemo[`FlowOnlyDemo`]
+    FlowDemo --> FlowOrchestrator[`Flow Orchestrator`]
+    
+    %% Sequential Steps
+    FlowOrchestrator --> Step1[`1. Initialize Topic`]
+    Step1 --> Step2[`2. Create Outline`]
+    Step2 --> Step3[`3. Draft Content`]
+    Step3 --> Step4[`4. Compliance Review`]
+    Step4 --> Step5[`5. Finalize Content`]
+    
+    %% LLM Calls for Each Step
+    Step1 --> LLM1[`🤖 LLM Call`<br/>Topic Initialization]
+    Step2 --> LLM2[`🤖 LLM Call`<br/>Outline Generation]
+    Step3 --> LLM3[`🤖 LLM Call`<br/>Content Drafting]
+    Step4 --> LLM4[`🤖 LLM Call`<br/>Compliance Review]
+    Step5 --> LLM5[`🤖 LLM Call`<br/>Content Finalization]
+    
+    %% Output
+    LLM1 --> FlowOutput[`artifacts/flow_only_output.md`]
+    LLM2 --> FlowOutput
+    LLM3 --> FlowOutput
+    LLM4 --> FlowOutput
+    LLM5 --> FlowOutput
+    
+    %% Styling
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef flowClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    
+    class User,CLI,DemoRunner userClass
+    class FlowDemo,FlowOrchestrator,Step1,Step2,Step3,Step4,Step5 flowClass
+    class LLM1,LLM2,LLM3,LLM4,LLM5 llmClass
+    class FlowOutput outputClass
+```
+
+**Key Characteristics:**
+- **High Control**: Step-by-step execution with precise control
+- **Predictable**: Deterministic flow with consistent outputs
+- **Auditable**: Each step is clearly defined and traceable
+- **Efficient**: Direct LLM calls without agent overhead
+
+### 3. Hybrid (Orchestrated + Collaborative) Architecture
+
+```mermaid
+graph TB
+    %% User Interaction
+    User[👤 User] --> CLI[`run_demo.py`<br/>Command Line Interface]
+    CLI --> DemoRunner[`LightningLesson1Demo`<br/>Orchestration Engine]
+    
+    %% Hybrid Path
+    DemoRunner --> HybridDemo[`HybridFlowDemo`]
+    HybridDemo --> FlowOrchestrator[`Flow Orchestrator`]
+    
+    %% Flow Steps
+    FlowOrchestrator --> Step1[`1. Initialize Topic`]
+    Step1 --> Step2[`2. Create Outline`]
+    Step2 --> Step3[`3. Collaborative Draft`]
+    Step3 --> Step4[`4. Compliance Review`]
+    Step4 --> Step5[`5. Finalize Content`]
+    
+    %% Direct LLM Calls
+    Step1 --> LLM1[`🤖 LLM Call`<br/>Topic Initialization]
+    Step2 --> LLM2[`🤖 LLM Call`<br/>Outline Generation]
+    Step4 --> LLM4[`🤖 LLM Call`<br/>Compliance Review]
+    Step5 --> LLM5[`🤖 LLM Call`<br/>Content Finalization]
+    
+    %% Mini Crew for Collaborative Draft
+    Step3 --> MiniCrew[`Mini Crew`<br/>Writer + Reviewer]
+    MiniCrew --> MiniWriter[`Mini Writer Agent`]
+    MiniCrew --> MiniReviewer[`Mini Reviewer Agent`]
+    
+    %% Mini Crew LLM Calls
+    MiniWriter --> MiniLLM1[`🤖 LLM Call`<br/>Collaborative Writing]
+    MiniReviewer --> MiniLLM2[`🤖 LLM Call`<br/>Collaborative Review]
+    
+    %% Output
+    LLM1 --> HybridOutput[`artifacts/hybrid_flow_output.md`]
+    LLM2 --> HybridOutput
+    MiniLLM1 --> HybridOutput
+    MiniLLM2 --> HybridOutput
+    LLM4 --> HybridOutput
+    LLM5 --> HybridOutput
+    
+    %% Styling
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef hybridClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef crewClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px
+    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    
+    class User,CLI,DemoRunner userClass
+    class HybridDemo,FlowOrchestrator,Step1,Step2,Step3,Step4,Step5 hybridClass
+    class MiniCrew,MiniWriter,MiniReviewer crewClass
+    class LLM1,LLM2,LLM4,LLM5,MiniLLM1,MiniLLM2 llmClass
+    class HybridOutput outputClass
+```
+
+**Key Characteristics:**
+- **Balanced Control**: Structure where needed, autonomy where valuable
+- **Selective Collaboration**: Mini crews for complex tasks, direct calls for simple ones
+- **Scalable**: Can handle both simple and complex workflows
+- **Maintainable**: Clear separation of concerns with flexible orchestration
 
 ### Key Architectural Differences
 
