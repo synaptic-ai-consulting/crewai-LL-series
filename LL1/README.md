@@ -50,10 +50,10 @@ graph TB
     ReviewerLLM --> CrewOutput
     
     %% Styling
-    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef crewClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px
-    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef crewClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
+    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
     
     class User,CLI,DemoRunner userClass
     class CrewDemo,CrewAgents,Writer,Reviewer crewClass
@@ -101,10 +101,10 @@ graph TB
     LLM5 --> FlowOutput
     
     %% Styling
-    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef flowClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px
-    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef flowClass fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px,color:#000
+    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
+    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
     
     class User,CLI,DemoRunner userClass
     class FlowDemo,FlowOrchestrator,Step1,Step2,Step3,Step4,Step5 flowClass
@@ -161,11 +161,11 @@ graph TB
     LLM5 --> HybridOutput
     
     %% Styling
-    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef hybridClass fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef crewClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px
-    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    classDef userClass fill:#e1f5fe,stroke:#01579b,stroke-width:2px,color:#000
+    classDef hybridClass fill:#fff3e0,stroke:#e65100,stroke-width:2px,color:#000
+    classDef crewClass fill:#f3e5f5,stroke:#4a148c,stroke-width:2px,color:#000
+    classDef llmClass fill:#ffebee,stroke:#c62828,stroke-width:2px,color:#000
+    classDef outputClass fill:#f1f8e9,stroke:#33691e,stroke-width:2px,color:#000
     
     class User,CLI,DemoRunner userClass
     class HybridDemo,FlowOrchestrator,Step1,Step2,Step3,Step4,Step5 hybridClass
