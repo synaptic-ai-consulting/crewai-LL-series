@@ -1,8 +1,6 @@
 # Lightning Lessons Series: Mastering Non-Obvious CrewAI Concepts
 
-Based on my comprehensive review of the CrewAI documentation and advanced features, I've identified five compelling **Lightning Lessons** that focus on non-obvious, high-value aspects of the framework. These 30-minute sessions will dive deep into sophisticated CrewAI concepts that go beyond basic tutorials.
-
-## Proposed Lightning Lesson Series
+## Lightning Lesson Series
 
 ### 1\. **Flows vs. Crews: When Structure Beats Autonomy** *(September 15th)*
 
