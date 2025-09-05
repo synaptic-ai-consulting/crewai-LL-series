@@ -38,12 +38,12 @@ graph TB
     CrewDemo --> CrewAgents[`CrewAI Agents`<br/>Writer + Reviewer]
     
     %% Agent Collaboration
-    CrewAgents --> Writer[`Writer Agent`]
-    CrewAgents --> Reviewer[`Reviewer Agent`]
+    CrewAgents --> Writer[`🤖 Writer Agent`]
+    CrewAgents --> Reviewer[`🤖 Reviewer Agent`]
     
     %% LLM Calls
-    Writer --> WriterLLM[`🤖 LLM Call`<br/>Content Generation]
-    Reviewer --> ReviewerLLM[`🤖 LLM Call`<br/>Content Review]
+    Writer --> WriterLLM[`🧠 LLM Call`<br/>Content Generation]
+    Reviewer --> ReviewerLLM[`🧠 LLM Call`<br/>Content Review]
     
     %% Output
     WriterLLM --> CrewOutput[`artifacts/crew_only_output.md`]
@@ -87,11 +87,11 @@ graph TB
     Step4 --> Step5[`5. Finalize Content`]
     
     %% LLM Calls for Each Step
-    Step1 --> LLM1[`🤖 LLM Call`<br/>Topic Initialization]
-    Step2 --> LLM2[`🤖 LLM Call`<br/>Outline Generation]
-    Step3 --> LLM3[`🤖 LLM Call`<br/>Content Drafting]
-    Step4 --> LLM4[`🤖 LLM Call`<br/>Compliance Review]
-    Step5 --> LLM5[`🤖 LLM Call`<br/>Content Finalization]
+    Step1 --> LLM1[`🧠 LLM Call`<br/>Topic Initialization]
+    Step2 --> LLM2[`🧠 LLM Call`<br/>Outline Generation]
+    Step3 --> LLM3[`🧠 LLM Call`<br/>Content Drafting]
+    Step4 --> LLM4[`🧠 LLM Call`<br/>Compliance Review]
+    Step5 --> LLM5[`🧠 LLM Call`<br/>Content Finalization]
     
     %% Output
     LLM1 --> FlowOutput[`artifacts/flow_only_output.md`]
@@ -138,19 +138,19 @@ graph TB
     Step4 --> Step5[`5. Finalize Content`]
     
     %% Direct LLM Calls
-    Step1 --> LLM1[`🤖 LLM Call`<br/>Topic Initialization]
-    Step2 --> LLM2[`🤖 LLM Call`<br/>Outline Generation]
-    Step4 --> LLM4[`🤖 LLM Call`<br/>Compliance Review]
-    Step5 --> LLM5[`🤖 LLM Call`<br/>Content Finalization]
+    Step1 --> LLM1[`🧠 LLM Call`<br/>Topic Initialization]
+    Step2 --> LLM2[`🧠 LLM Call`<br/>Outline Generation]
+    Step4 --> LLM4[`🧠 LLM Call`<br/>Compliance Review]
+    Step5 --> LLM5[`🧠 LLM Call`<br/>Content Finalization]
     
     %% Mini Crew for Collaborative Draft
     Step3 --> MiniCrew[`Mini Crew`<br/>Writer + Reviewer]
-    MiniCrew --> MiniWriter[`Mini Writer Agent`]
-    MiniCrew --> MiniReviewer[`Mini Reviewer Agent`]
+    MiniCrew --> MiniWriter[`🤖 Mini Writer Agent`]
+    MiniCrew --> MiniReviewer[`🤖 Mini Reviewer Agent`]
     
     %% Mini Crew LLM Calls
-    MiniWriter --> MiniLLM1[`🤖 LLM Call`<br/>Collaborative Writing]
-    MiniReviewer --> MiniLLM2[`🤖 LLM Call`<br/>Collaborative Review]
+    MiniWriter --> MiniLLM1[`🧠 LLM Call`<br/>Collaborative Writing]
+    MiniReviewer --> MiniLLM2[`🧠 LLM Call`<br/>Collaborative Review]
     
     %% Output
     LLM1 --> HybridOutput[`artifacts/hybrid_flow_output.md`]
