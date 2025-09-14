@@ -92,6 +92,9 @@ Thumbs.db
 # Artifacts directory - Keep generated outputs private
 artifacts/
 
+# Document directory
+docs/
+
 # Logs
 *.log
 logs/
