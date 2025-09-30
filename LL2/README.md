@@ -8,6 +8,8 @@ This demo showcases CrewAI's prompt injection system and advanced prompt customi
 - **Multiple Customization Approaches**: Custom templates, crew-level JSON, model-specific formatting
 - **Enterprise Persona Types**: Legal, Marketing, and Technical personas with distinct characteristics
 
+Note: A full live session recording that walks through these concepts is available here: [Advanced Prompt Engineering & Agent Personas](https://maven.com/p/c5faf1/advanced-prompt-engineering-agent-personas).
+
 ## Project Structure
 ```
 LL2/
@@ -283,6 +285,7 @@ Set `CREWAI_VERBOSE=True` in your `.env` file for detailed logging.
 - [CrewAI Documentation](https://docs.crewai.com/)
 - [CrewAI Prompt Customization Guide](https://docs.crewai.com/en/guides/advanced/customizing-prompts)
 - [Llama 3.1 Prompt Template](https://www.llama.com/docs/model-cards-and-prompt-formats/llama3_1/#prompt-template)
+- [Live session recording: Advanced Prompt Engineering & Agent Personas](https://maven.com/p/c5faf1/advanced-prompt-engineering-agent-personas)
 
 ---
 
