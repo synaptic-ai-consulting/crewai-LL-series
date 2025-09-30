@@ -28,15 +28,15 @@ The CrewAI Lightning Lessons Series focuses on **non-obvious, enterprise-grade c
 **Focus**: Leveraging CrewAI's prompt customization capabilities for enterprise-grade agent behavior
 
 **Key Topics**:
-- Custom prompt templates and the `prompt_file` attribute
-- Agent persona engineering for consistent behavior across tasks
-- Context engineering techniques for multi-agent coordination
+- CrewAI Prompt Injection: What CrewAI automatically injects into prompts (transparency)
+- Multiple Customization Approaches: Custom templates, crew-level JSON, model-specific formatting
+- Enterprise Persona Types: Legal, Marketing, and Technical personas with distinct characteristics
 - **Non-obvious insight**: How to design agent personas that maintain consistency while adapting to different collaboration patterns
 
 **What You'll Learn**:
-- ⚡ Master Custom Prompt Templates and File Integration
+- ⚡ Understand CrewAI Prompt Injection
+- ⚡ Implement Multiple Prompt Customization Approaches
 - ⚡ Design Agent Personas for Enterprise Brand Consistency
-- ⚡ Apply Context Engineering for Multi-Agent Coordination
 
 ---
 
