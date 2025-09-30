@@ -96,7 +96,6 @@ artifacts/
 # Document directories - Keep docs private for all LL folders
 LL*/docs/
 docs/
-LL2/
 
 # Logs
 *.log
