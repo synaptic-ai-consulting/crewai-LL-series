@@ -1,0 +1,104 @@
+# Lightning Lesson 2: Crew Configurations
+# Advanced Agent Persona Architecture
+
+# Default Marketing Crew (Generic)
+default_marketing_crew:
+  agents:
+    - "default_marketing_agent"
+  tasks:
+    - "comparison_email_task"
+  process: "sequential"
+  verbose: true
+  memory: true
+
+# Persona-Engineered Marketing Crew
+persona_marketing_crew:
+  agents:
+    - "creative_marketing_agent"
+  tasks:
+    - "comparison_persona_task"
+  process: "sequential"
+  verbose: true
+  memory: true
+
+# Legal Compliance Crew
+legal_compliance_crew:
+  agents:
+    - "legal_compliance_agent"
+  tasks:
+    - "privacy_policy_review"
+    - "terms_of_service_review"
+    - "data_processing_agreement"
+  process: "sequential"
+  verbose: true
+  memory: true
+
+# Creative Marketing Crew
+creative_marketing_crew:
+  agents:
+    - "creative_marketing_agent"
+  tasks:
+    - "product_launch_email"
+    - "social_media_strategy"
+    - "brand_positioning"
+  process: "sequential"
+  verbose: true
+  memory: true
+
+# Technical Lead Crew
+technical_lead_crew:
+  agents:
+    - "technical_lead_agent"
+  tasks:
+    - "microservices_architecture"
+    - "security_audit"
+    - "disaster_recovery_plan"
+  process: "sequential"
+  verbose: true
+  memory: true
+
+# Multi-Persona Demo Crew (All personas working together)
+multi_persona_crew:
+  agents:
+    - "legal_compliance_agent"
+    - "creative_marketing_agent"
+    - "technical_lead_agent"
+  tasks:
+    - "product_launch_email"
+    - "privacy_policy_review"
+    - "microservices_architecture"
+  process: "sequential"
+  verbose: true
+  memory: true
+
+# Crew-Level Customization Demo
+crew_customization_demo:
+  agents:
+    - "creative_marketing_agent"
+  tasks:
+    - "product_launch_email"
+  process: "sequential"
+  verbose: true
+  memory: true
+  prompt_file: "prompts/custom_prompts.json"
+
+# Prompt Inspection Demo Crew
+prompt_inspection_crew:
+  agents:
+    - "prompt_inspection_default"
+    - "prompt_inspection_with_tools"
+  tasks:
+    - "comparison_email_task"
+  process: "sequential"
+  verbose: true
+  memory: true
+
+# Model-Specific Demo Crew (Llama 3.3)
+llama_demo_crew:
+  agents:
+    - "llama_demo_agent"
+  tasks:
+    - "microservices_architecture"
+  process: "sequential"
+  verbose: true
+  memory: true
