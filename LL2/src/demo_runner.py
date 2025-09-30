@@ -202,43 +202,31 @@ class LightningLesson2Demo:
         # Create crews for different approaches
         crews = self.agents_manager.create_customization_demo_crews()
         customization_results = {}
-        
+
+        # Showcase three approaches clearly
+        approach_titles = {
+            "crew_level_json": "Crew-Level JSON (prompt_file)",
+            "custom_templates": "Custom Templates (system/prompt)",
+            "model_specific": "Model-Specific (Llama formatting)"
+        }
+
         task_description = "Write a product launch email for our new AI tool"
-        
-        for crew_name, crew in crews.items():
-            print(f"\n🔧 {crew_name.upper()} APPROACH:")
+
+        for crew_key, crew in crews.items():
+            print(f"\n🔧 {approach_titles.get(crew_key, crew_key).upper()}:")
             print("-" * 40)
             
             try:
-                # Create a simple task for the crew
-                from crewai import Task
-                task = Task(
-                    description=task_description,
-                    expected_output="A compelling product launch email",
-                    agent=crew.agents[0] if crew.agents else None
-                )
-                
-                # Execute the crew
+                # Execute the crew as-is; crew configuration defines customization
                 result = crew.kickoff()
                 
-                if hasattr(result, 'raw'):
-                    response = str(result.raw)
-                else:
-                    response = str(result)
-                
+                response = str(result.raw) if hasattr(result, 'raw') else str(result)
                 print(response)
-                customization_results[crew_name] = {
-                    "success": True,
-                    "response": response
-                }
-                
+                customization_results[crew_key] = {"success": True, "response": response}
             except Exception as e:
-                error_msg = f"Error executing {crew_name}: {str(e)}"
+                error_msg = f"Error executing {crew_key}: {str(e)}"
                 print(f"❌ {error_msg}")
-                customization_results[crew_name] = {
-                    "success": False,
-                    "error": error_msg
-                }
+                customization_results[crew_key] = {"success": False, "error": error_msg}
             
             print("\n" + "="*60)
         

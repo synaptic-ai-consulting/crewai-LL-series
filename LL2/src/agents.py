@@ -75,10 +75,8 @@ class YAMLAgentFactory:
     def _load_template_file(self, template_path: str) -> str:
         """Load template content from file"""
         try:
-            print(f"Debug: Loading template from: {template_path}")
             with open(template_path, 'r', encoding='utf-8') as f:
                 content = f.read().strip()
-                print(f"Debug: Successfully loaded template, length: {len(content)}")
                 return content
         except FileNotFoundError:
             print(f"Warning: Template file not found: {template_path}")
@@ -97,15 +95,17 @@ class YAMLAgentFactory:
         # Extract task parameters
         description = task_config.get("description", "")
         expected_output = task_config.get("expected_output", "")
-        context = task_config.get("context", "")
+        context = task_config.get("context")
         agent_name = task_config.get("agent")
         
         # Create task
         task_params = {
             "description": description,
-            "expected_output": expected_output,
-            "context": context
+            "expected_output": expected_output
         }
+        # Only include context if it's a list of dicts as expected by CrewAI
+        if isinstance(context, list) and all(isinstance(item, dict) for item in context):
+            task_params["context"] = context
         
         # Add agent if specified
         if agent_name:
@@ -239,9 +239,9 @@ class LightningLesson2Agents:
     def create_customization_demo_crews(self) -> Dict[str, Crew]:
         """Create crews for different customization approaches"""
         return {
-            "crew_customization": self.factory.create_crew("crew_customization_demo"),
-            "llama_demo": self.factory.create_crew("llama_demo_crew"),
-            "prompt_inspection": self.factory.create_crew("prompt_inspection_crew")
+            "crew_level_json": self.factory.create_crew("crew_customization_demo"),
+            "custom_templates": self.factory.create_crew("custom_templates_demo"),
+            "model_specific": self.factory.create_crew("llama_demo_crew")
         }
     
     def inspect_prompts(self, agent: Agent) -> Dict[str, str]:

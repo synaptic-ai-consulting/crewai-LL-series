@@ -54,6 +54,18 @@ def main():
     
     # Load environment variables
     load_dotenv()
+
+    # Optional: disable CrewAI Plus traces/telemetry to avoid EventBus noise in demos
+    if os.getenv("CREW_DEMO_DISABLE_TRACES", "true").lower() in ("1", "true", "yes", "on"):
+        for var, val in [
+            ("CREWAI_PLUS_ENABLED", "false"),
+            ("CREWAI_PLUS_TRACES_ENABLED", "false"),
+            ("CREWAI_TRACES_ENABLED", "false"),
+            ("CREWAI_TRACE_ENABLED", "false"),
+            ("CREWAI_EVENT_BUS_ENABLED", "false"),
+            ("CREWAI_TELEMETRY", "false"),
+        ]:
+            os.environ.setdefault(var, val)
     
     # Check for required environment variables
     if not os.getenv("OPENAI_API_KEY"):

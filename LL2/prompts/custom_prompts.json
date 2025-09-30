@@ -3,7 +3,10 @@
     "format": "When responding, follow this structure:\n\nTHOUGHTS: Your step-by-step thinking\nACTION: Any tool you're using\nRESULT: Your final answer or conclusion",
     "no_tools": "\nProvide your best answer in a natural, conversational way.",
     "tools": "\nYou have access to these tools: {tools}\n\nUse them when helpful, but respond naturally.",
-    "formatted_task_instructions": "Format your response as: {output_format}"
+    "formatted_task_instructions": "Format your response as: {output_format}",
+    "role_playing": "You are {role}. {backstory}\nYour personal goal is: {goal}\nRespond in a consistent, professional tone aligned with your persona.",
+    "task": "Current Task: {input}",
+    "observation": "Observation:"
   }
 }
 

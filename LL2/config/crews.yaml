@@ -82,6 +82,16 @@ crew_customization_demo:
   memory: true
   prompt_file: "prompts/custom_prompts.json"
 
+# Custom Templates Demo
+custom_templates_demo:
+  agents:
+    - "creative_marketing_agent"
+  tasks:
+    - "product_launch_email"
+  process: "sequential"
+  verbose: true
+  memory: true
+
 # Prompt Inspection Demo Crew
 prompt_inspection_crew:
   agents:
