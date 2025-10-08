@@ -1,1 +1,73 @@
-# Placeholder for agents.yaml
+# Lightning Lesson 3: Advanced Memory Architecture
+# Agent configurations for demonstrating CrewAI's memory capabilities
+
+agents:
+  red_co_support:
+    role: "Red.Co Customer Support Specialist"
+    goal: "Provide helpful customer support without memory capabilities"
+    backstory: "Experienced customer support agent at Red.Co, focused on resolving issues efficiently but without access to memory systems"
+    llm: "openai/gpt-4o"
+    verbose: false
+    allow_delegation: false
+    max_iter: 3
+    max_execution_time: 300
+    memory: false
+    respect_context_window: true
+    max_retry_limit: 2
+    prompt_file: "prompts/red_co_support.txt"
+
+  blue_co_support:
+    role: "Blue.Co Customer Support Specialist"
+    goal: "Provide exceptional customer support using memory to remember context and improve service"
+    backstory: "Senior customer support specialist at Blue.Co with access to advanced memory systems that help remember customer interactions and provide personalized service"
+    llm: "openai/gpt-4o"
+    verbose: false
+    allow_delegation: false
+    max_iter: 3
+    max_execution_time: 300
+    memory: true
+    respect_context_window: true
+    max_retry_limit: 2
+    prompt_file: "prompts/blue_co_support.txt"
+
+  learning_agent:
+    role: "Learning Customer Support Agent"
+    goal: "Learn from customer interactions and improve service through memory optimization"
+    backstory: "Advanced customer support agent that learns from every interaction, building knowledge patterns to provide better service over time"
+    llm: "openai/gpt-4o"
+    verbose: false
+    allow_delegation: false
+    max_iter: 5
+    max_execution_time: 400
+    memory: true
+    respect_context_window: true
+    max_retry_limit: 3
+    prompt_file: "prompts/learning_agent.txt"
+
+  basic_memory_agent:
+    role: "Basic Memory Support Agent"
+    goal: "Provide customer support using standard memory capabilities"
+    backstory: "Customer support agent using standard CrewAI memory for basic context retention"
+    llm: "openai/gpt-4o"
+    verbose: false
+    allow_delegation: false
+    max_iter: 3
+    max_execution_time: 300
+    memory: true
+    respect_context_window: true
+    max_retry_limit: 2
+    prompt_file: "prompts/basic_memory_agent.txt"
+
+  optimized_memory_agent:
+    role: "Optimized Memory Support Agent"
+    goal: "Provide high-performance customer support using optimized memory systems"
+    backstory: "Enterprise-grade customer support agent with optimized memory systems for fast, efficient service under high load"
+    llm: "openai/gpt-4o"
+    verbose: false
+    allow_delegation: false
+    max_iter: 3
+    max_execution_time: 300
+    memory: true
+    respect_context_window: true
+    max_retry_limit: 2
+    prompt_file: "prompts/optimized_memory_agent.txt"
