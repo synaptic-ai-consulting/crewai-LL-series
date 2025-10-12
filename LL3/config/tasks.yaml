@@ -13,13 +13,9 @@ tasks:
     human_input: false
 
   learn_resolution_pattern:
-    description: "Learn from customer interaction and store resolution pattern for future use"
-    expected_output: "Resolution pattern stored in memory for future similar situations"
+    description: "Continue the customer support conversation naturally, using both Short-Term Memory for conversational context and Long-Term Memory for learned patterns. Respond as if you're having a continuous chat conversation, not starting fresh each time."
+    expected_output: "A natural continuation of the customer support conversation that maintains context and provides helpful assistance"
     agent: "learning_agent"
-    context:
-      - "Customer complaint details"
-      - "Resolution steps taken"
-      - "Customer satisfaction level"
     output_file: "artifacts/learning_pattern.md"
     human_input: false
 

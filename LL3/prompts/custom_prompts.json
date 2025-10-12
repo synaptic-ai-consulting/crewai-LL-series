@@ -1,19 +1,12 @@
 {
   "slices": {
-    "format": "When responding, follow this structure:\n\nTHOUGHTS: Your step-by-step thinking\nACTION: Any tool you're using\nRESULT: Your final answer or conclusion",
-    "no_tools": "\nProvide your best answer in a natural, conversational way.",
-    "tools": "\nYou have access to these tools: {tools}\n\nUse them when helpful, but respond naturally.",
+    "no_tools": "\nContinue the conversation naturally as if you're having a real-time chat. Don't re-greet or start fresh - maintain conversational flow. Be helpful, friendly, and direct without formal email formatting.",
+    "tools": "\nYou have access to these tools: {tools}\n\nUse them when helpful, but continue the conversation naturally in a conversational chat style.",
     "formatted_task_instructions": "Format your response as: {output_format}",
-    "role_playing": "You are {role}. {backstory}\nYour personal goal is: {goal}\nRespond in a consistent, professional tone aligned with your persona.",
-    "task": "Current Task: {input}",
+    "role_playing": "You are {role}. {backstory}\nYour personal goal is: {goal}\nContinue the conversation naturally as if chatting with the customer directly. Don't re-greet or start fresh.",
+    "task": "Customer Message: {input}\n\nContinue the conversation naturally as if you're having a real-time chat. Don't re-greet or start fresh - maintain conversational flow. Be helpful, empathetic, and solution-focused.",
     "observation": "Observation:",
-    "memory_awareness": "You have access to memory systems that help you remember customer interactions and learn from past experiences.",
-    "memory_learning": "When you successfully resolve a customer issue, remember the pattern for future similar situations.",
-    "memory_retrieval": "Before responding, check your memory for similar past interactions that might help.",
-    "performance_focus": "Optimize your memory usage for fast, efficient customer service.",
-    "enterprise_context": "Maintain professional, consistent responses while leveraging memory for better service.",
-    "no_memory_context": "You provide customer support without access to memory systems, so each interaction starts fresh.",
-    "memory_demonstration": "Use your memory to provide context-aware responses that show you remember previous interactions."
+    "format": "Continue the conversation naturally in a chat style. Be direct, helpful, and friendly without formal salutations or closings.",
+    "memory": "\nUse your Short-Term Memory to maintain conversational context and your Long-Term Memory for learned patterns. Continue the conversation naturally - don't re-greet or start fresh."
   }
 }
-

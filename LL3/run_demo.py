@@ -69,6 +69,7 @@ def main():
             print("   - Customer support agent that learns from interactions")
             print("   - Real-time memory event monitoring")
             print("   - Multiple customer scenarios")
+            print("   - Port: 8002")
             
             print("\n3️⃣  Demo 3: Performance Comparison")
             print("   - Basic memory vs optimized memory")
@@ -96,8 +97,8 @@ def main():
             
         elif args.demo == 2:
             print("🚀 Starting Demo 2: Learning Agents with Memory Events")
-            print("⚠️  Demo 2 not yet implemented")
-            return 1
+            from src.demo2_learning_agents import run_demo
+            run_demo()
             
         elif args.demo == 3:
             print("🚀 Starting Demo 3: Performance Comparison")
