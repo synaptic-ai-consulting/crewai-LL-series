@@ -9,8 +9,7 @@ import sys
 import yaml
 import time
 from flask import Flask, render_template, request, jsonify
-from crewai import Crew, Agent, Task, Process
-from langchain.chat_models import ChatOpenAI
+from crewai import Crew, Agent, Task, Process, LLM
 # Memory imports removed - using basic CrewAI memory functionality
 from dotenv import load_dotenv
 
@@ -39,8 +38,8 @@ class MemoryComparisonDemo:
     def setup_crews(self):
         """Setup Red.Co and Blue.Co crews with different memory settings"""
         
-        # Initialize LLM
-        llm = ChatOpenAI(model="gpt-4o")
+        # Initialize LLM using CrewAI's LLM wrapper (avoids langchain deprecations)
+        llm = LLM(model="gpt-4o-mini")
         
         # Red.Co Agent (No Memory)
         red_agent = Agent(
@@ -73,22 +72,24 @@ class MemoryComparisonDemo:
         )
         
         # Create tasks from YAML configuration
+        handle_cfg = self.tasks_config.get('tasks', {}).get('handle_customer_inquiry', {}) if isinstance(self.tasks_config, dict) else {}
         red_task = Task(
-            description=self.tasks_config['tasks']['handle_customer_inquiry']['description'],
-            expected_output=self.tasks_config['tasks']['handle_customer_inquiry']['expected_output'],
+            description=handle_cfg.get('description', 'Handle customer inquiry'),
+            expected_output=handle_cfg.get('expected_output', 'A helpful response'),
             agent=red_agent,
-            context=self.tasks_config['tasks']['handle_customer_inquiry'].get('context', []),
-            output_file=self.tasks_config['tasks']['handle_customer_inquiry'].get('output_file'),
-            human_input=self.tasks_config['tasks']['handle_customer_inquiry'].get('human_input', False)
+            context=handle_cfg.get('context', []),
+            output_file=handle_cfg.get('output_file'),
+            human_input=handle_cfg.get('human_input', False)
         )
         
+        mem_demo_cfg = self.tasks_config.get('tasks', {}).get('memory_demonstration', {}) if isinstance(self.tasks_config, dict) else {}
         blue_task = Task(
-            description=self.tasks_config['tasks']['memory_demonstration']['description'],
-            expected_output=self.tasks_config['tasks']['memory_demonstration']['expected_output'],
+            description=mem_demo_cfg.get('description', 'Demonstrate memory capabilities'),
+            expected_output=mem_demo_cfg.get('expected_output', 'A response using previous context'),
             agent=blue_agent,
-            context=self.tasks_config['tasks']['memory_demonstration'].get('context', []),
-            output_file=self.tasks_config['tasks']['memory_demonstration'].get('output_file'),
-            human_input=self.tasks_config['tasks']['memory_demonstration'].get('human_input', False)
+            context=mem_demo_cfg.get('context', []),
+            output_file=mem_demo_cfg.get('output_file'),
+            human_input=mem_demo_cfg.get('human_input', False)
         )
         
         # Create crews
@@ -184,46 +185,50 @@ Note: I don't have memory capabilities, so each conversation starts from scratch
                 "error": str(e)
             }
 
-# Create Flask app for Red.Co
-red_app = Flask(__name__, template_folder='../templates')
-red_demo = MemoryComparisonDemo()
+def create_apps():
+    """Create Flask apps and demo instances for Red.Co and Blue.Co"""
+    red_app = Flask(__name__, template_folder='../templates')
+    blue_app = Flask(__name__, template_folder='../templates')
 
-@red_app.route('/')
-def red_index():
-    return render_template('red_co_chat.html', company="Red.Co", port=red_demo.red_port)
+    red_demo = MemoryComparisonDemo()
+    blue_demo = MemoryComparisonDemo()
 
-@red_app.route('/chat', methods=['POST'])
-def red_chat():
-    data = request.json
-    message = data.get('message', '')
-    response = red_demo.process_red_co_message(message)
-    return jsonify(response)
+    @red_app.route('/')
+    def red_index():
+        return render_template('red_co_chat.html', company="Red.Co", port=red_demo.red_port)
 
-@red_app.route('/memory-info')
-def red_memory_info():
-    return jsonify({"memory_enabled": False, "storage_path": "No memory system"})
+    @red_app.route('/chat', methods=['POST'])
+    def red_chat():
+        data = request.get_json(silent=True) or {}
+        message = data.get('message', '')
+        response = red_demo.process_red_co_message(message)
+        return jsonify(response)
 
-# Create Flask app for Blue.Co
-blue_app = Flask(__name__, template_folder='../templates')
-blue_demo = MemoryComparisonDemo()
+    @red_app.route('/memory-info')
+    def red_memory_info():
+        return jsonify({"memory_enabled": False, "storage_path": "No memory system"})
 
-@blue_app.route('/')
-def blue_index():
-    return render_template('blue_co_chat.html', company="Blue.Co", port=blue_demo.blue_port)
+    @blue_app.route('/')
+    def blue_index():
+        return render_template('blue_co_chat.html', company="Blue.Co", port=blue_demo.blue_port)
 
-@blue_app.route('/chat', methods=['POST'])
-def blue_chat():
-    data = request.json
-    message = data.get('message', '')
-    response = blue_demo.process_blue_co_message(message)
-    return jsonify(response)
+    @blue_app.route('/chat', methods=['POST'])
+    def blue_chat():
+        data = request.get_json(silent=True) or {}
+        message = data.get('message', '')
+        response = blue_demo.process_blue_co_message(message)
+        return jsonify(response)
 
-@blue_app.route('/memory-info')
-def blue_memory_info():
-    return jsonify(blue_demo.get_memory_info())
+    @blue_app.route('/memory-info')
+    def blue_memory_info():
+        return jsonify(blue_demo.get_memory_info())
+
+    return red_app, blue_app, red_demo, blue_demo
 
 def run_demo():
     """Run the memory comparison demo"""
+    # Create apps and demo instances lazily to avoid import-time errors
+    red_app, blue_app, red_demo, blue_demo = create_apps()
     print("🚀 Starting Lightning Lesson 3 - Demo 1: Memory Comparison")
     print(f"📱 Red.Co (No Memory): http://localhost:{red_demo.red_port}")
     print(f"📱 Blue.Co (With Memory): http://localhost:{red_demo.blue_port}")

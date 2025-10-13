@@ -31,14 +31,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
 
 def main():
     parser = argparse.ArgumentParser(description='Lightning Lesson 3 Demo Runner')
-    parser.add_argument('--demo', type=int, choices=[1, 2, 3],
-                       help='Run specific demo (1: Memory comparison, 2: Learning agents, 3: Performance)')
+    parser.add_argument('--demo', type=int, choices=[1, 2],
+                       help='Run specific demo (1: Memory comparison, 2: Learning agents)')
     parser.add_argument('--ports', type=str,
                        help='Custom ports for demo 1 (format: 8000,8001)')
     parser.add_argument('--customers', type=int, default=3,
                        help='Number of customer scenarios for demo 2')
-    parser.add_argument('--record', action='store_true',
-                       help='Record load testing video for demo 3')
+    # Deprecated: performance demo removed
     parser.add_argument('--list-demos', action='store_true',
                        help='List available demos')
     parser.add_argument('--validate', action='store_true',
@@ -71,10 +70,7 @@ def main():
             print("   - Multiple customer scenarios")
             print("   - Port: 8002")
             
-            print("\n3️⃣  Demo 3: Performance Comparison")
-            print("   - Basic memory vs optimized memory")
-            print("   - Load testing with performance monitoring")
-            print("   - Pre-recorded load testing video")
+            # Demo 3 removed
             
             return 0
             
@@ -100,10 +96,7 @@ def main():
             from src.demo2_learning_agents import run_demo
             run_demo()
             
-        elif args.demo == 3:
-            print("🚀 Starting Demo 3: Performance Comparison")
-            print("⚠️  Demo 3 not yet implemented")
-            return 1
+        # Demo 3 removed
             
         else:
             # Run all demos in sequence

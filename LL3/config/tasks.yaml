@@ -2,13 +2,17 @@
 # Task configurations for demonstrating CrewAI's memory capabilities
 
 tasks:
+  memory_demonstration:
+    description: "Demonstrate memory capabilities by handling follow-up questions with context"
+    expected_output: "Response that shows memory of previous conversation context"
+    agent: "memory_agent"
+    output_file: "artifacts/memory_demo_response.md"
+    human_input: false
+    
   handle_customer_inquiry:
     description: "Handle customer support inquiry and provide helpful response"
     expected_output: "A helpful and professional response to the customer's inquiry"
     agent: "customer_support_agent"
-    context:
-      - "Customer inquiry details"
-      - "Previous interaction history (if available)"
     output_file: "artifacts/customer_response.md"
     human_input: false
 
@@ -23,18 +27,6 @@ tasks:
     description: "Handle customer inquiry under performance testing conditions"
     expected_output: "Fast and accurate response to customer inquiry"
     agent: "performance_agent"
-    context:
-      - "Customer inquiry details"
-      - "Performance metrics tracking"
     output_file: "artifacts/performance_response.md"
     human_input: false
 
-  memory_demonstration:
-    description: "Demonstrate memory capabilities by handling follow-up questions with context"
-    expected_output: "Response that shows memory of previous conversation context"
-    agent: "memory_agent"
-    context:
-      - "Current customer question"
-      - "Previous conversation history"
-    output_file: "artifacts/memory_demo_response.md"
-    human_input: false
