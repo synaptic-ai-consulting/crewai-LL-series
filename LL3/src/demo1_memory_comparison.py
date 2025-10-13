@@ -110,24 +110,22 @@ class MemoryComparisonDemo:
         )
     
     def process_red_co_message(self, message):
-        """Process message through Red.Co crew (no memory) - simplified approach"""
+        """Process message through Red.Co crew (no memory) using actual LLM"""
         try:
-            # Create a simple response without using CrewAI memory features
-            # This simulates a basic customer support response without memory
-            response_text = f"""Hello! I'm your Red.Co customer support specialist. 
+            # Update the Red.Co task with the customer's message and run without memory
+            handle_cfg = self.tasks_config.get('tasks', {}).get('handle_customer_inquiry', {}) if isinstance(self.tasks_config, dict) else {}
+            original_description = handle_cfg.get('description', 'Handle customer inquiry and provide helpful response')
+            self.red_crew.tasks[0].description = f"{original_description}\n\nCustomer inquiry: {message}"
 
-Regarding your inquiry: "{message}"
+            result = self.red_crew.kickoff()
 
-At Red.Co, we offer a range of reliable technology products including:
-- Smart home devices
-- Personal electronics  
-- Productivity tools
-- Tech accessories
+            if hasattr(result, 'raw'):
+                response_text = result.raw
+            elif hasattr(result, 'output'):
+                response_text = result.output
+            else:
+                response_text = str(result)
 
-I don't have access to our previous conversations, so I'm starting fresh with your request. How can I help you today?
-
-Note: I don't have memory capabilities, so each conversation starts from scratch."""
-            
             return {
                 "response": response_text,
                 "memory_used": False,
