@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ company }} - Customer Support</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -147,6 +148,7 @@
             <div class="input-group">
                 <input type="text" id="messageInput" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
                 <button onclick="sendMessage()">Send</button>
+                <button onclick="showMemoryInfo()" style="background: #2ed573;">Memory Info</button>
             </div>
         </div>
     </div>
@@ -157,12 +159,17 @@
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${isUser ? 'user-message' : 'agent-message'}`;
             
-            if (hasMemory && !isUser) {
-                messageDiv.innerHTML = content + ' <span class="memory-indicator">USING MEMORY</span>';
-            } else {
-                messageDiv.innerHTML = content;
+            // Render Markdown for agent messages
+            let displayContent = content;
+            if (!isUser) {
+                displayContent = marked.parse(content);
             }
             
+            if (hasMemory && !isUser) {
+                displayContent += ' <span class="memory-indicator">USING MEMORY</span>';
+            }
+            
+            messageDiv.innerHTML = displayContent;
             chatContainer.appendChild(messageDiv);
             chatContainer.scrollTop = chatContainer.scrollHeight;
         }
@@ -210,6 +217,22 @@
             if (event.key === 'Enter') {
                 sendMessage();
             }
+        }
+
+        function showMemoryInfo() {
+            fetch('/memory-info')
+                .then(response => response.json())
+                .then(data => {
+                    const info = `🧠 Memory System Info:
+• Storage Path: ${data.storage_path}
+• Memory Type: ${data.memory_type}
+• Demo: ${data.demo}
+• Status: ${data.memory_enabled ? 'Enabled' : 'Disabled'}`;
+                    addMessage(info, false, true);
+                })
+                .catch(error => {
+                    addMessage('Sorry, could not retrieve memory information.', false, false);
+                });
         }
     </script>
 </body>

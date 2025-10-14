@@ -1,10 +1,24 @@
 # Check CrewAI storage location
 import os
+import sys
+import argparse
 from pathlib import Path
 
-# Set our custom storage directory
+parser = argparse.ArgumentParser(description="Check CrewAI storage location (optionally per demo)")
+parser.add_argument("--demo", choices=["1", "2", "demo1", "demo2"], help="Select demo storage subfolder")
+args = parser.parse_args()
+
+# Resolve storage directory (optionally per demo)
 project_root = Path(__file__).parent.parent
-storage_dir = project_root / "storage"
+base_storage_dir = project_root / "storage"
+
+if args.demo in ("1", "demo1"):
+    storage_dir = base_storage_dir / "demo1"
+elif args.demo in ("2", "demo2"):
+    storage_dir = base_storage_dir / "demo2"
+else:
+    storage_dir = base_storage_dir
+
 os.makedirs(storage_dir, exist_ok=True)
 os.environ["CREWAI_STORAGE_DIR"] = str(storage_dir)
 

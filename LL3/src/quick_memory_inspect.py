@@ -7,11 +7,24 @@ Usage: python src/quick_memory_inspect.py
 import os
 import sys
 import json
+import argparse
 from pathlib import Path
 
-# Set up the same environment as the demo
+parser = argparse.ArgumentParser(description="Quickly inspect CrewAI memory contents")
+parser.add_argument("--demo", choices=["1", "2", "demo1", "demo2"], help="Select demo storage subfolder")
+args = parser.parse_args()
+
+# Set up the same environment as the selected demo
 project_root = Path(__file__).parent.parent  # Go up from src/ to LL3/
-storage_dir = project_root / "storage"  # LL3/storage
+base_storage_dir = project_root / "storage"  # LL3/storage
+
+if args.demo in ("1", "demo1"):
+    storage_dir = base_storage_dir / "demo1"
+elif args.demo in ("2", "demo2"):
+    storage_dir = base_storage_dir / "demo2"
+else:
+    storage_dir = base_storage_dir
+
 os.environ["CREWAI_STORAGE_DIR"] = str(storage_dir)
 
 def quick_inspect():

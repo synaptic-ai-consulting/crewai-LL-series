@@ -10,7 +10,8 @@ from pathlib import Path
 
 # CRITICAL: Set environment variable BEFORE any CrewAI imports
 project_root = Path(__file__).parent.parent
-storage_dir = project_root / "storage"
+# Use a dedicated subdirectory for Demo 2 to avoid cross-demo memory pollution
+storage_dir = project_root / "storage" / "demo2"
 os.makedirs(storage_dir, exist_ok=True)
 os.environ["CREWAI_STORAGE_DIR"] = str(storage_dir)
 
@@ -18,7 +19,7 @@ os.environ["CREWAI_STORAGE_DIR"] = str(storage_dir)
 print(f"🔧 Using custom storage directory: {os.environ.get('CREWAI_STORAGE_DIR', 'default')}")
 
 # Debug: Check if storage directory exists and is writable
-storage_path = os.environ.get('CREWAI_STORAGE_DIR', './storage')
+storage_path = os.environ.get('CREWAI_STORAGE_DIR', './storage/demo2')
 if os.path.exists(storage_path):
     print(f"✅ Storage directory exists: {storage_path}")
     print(f"📁 Storage contents: {os.listdir(storage_path)}")

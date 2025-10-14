@@ -8,13 +8,25 @@ import os
 import sys
 import yaml
 import time
+from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 from crewai import Crew, Agent, Task, Process, LLM
-# Memory imports removed - using basic CrewAI memory functionality
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# CRITICAL: Set demo-specific storage directory BEFORE any CrewAI imports
+project_root = Path(__file__).parent.parent
+# Use demo1 subdirectory for Demo 1 storage
+demo1_storage_dir = project_root / "storage" / "demo1"
+os.makedirs(demo1_storage_dir, exist_ok=True)
+
+# Set CREWAI_STORAGE_DIR to demo1 subdirectory following CrewAI documentation
+os.environ["CREWAI_STORAGE_DIR"] = str(demo1_storage_dir)
+
+print(f"🔧 Demo 1 using storage directory: {os.environ.get('CREWAI_STORAGE_DIR', 'default')}")
+print(f"📁 Storage directory contents: {os.listdir(demo1_storage_dir) if os.path.exists(demo1_storage_dir) else 'Directory not found'}")
 
 # Add current directory to path for imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -66,30 +78,34 @@ class MemoryComparisonDemo:
             allow_delegation=False,
             max_iter=3,
             max_execution_time=300,
-            memory=True,
+            memory=True,  # Re-enabled with default storage
             respect_context_window=True,
             max_retry_limit=2
         )
         
-        # Create tasks from YAML configuration
+        # Create the SAME task for both agents - only difference is memory=True/False
         handle_cfg = self.tasks_config.get('tasks', {}).get('handle_customer_inquiry', {}) if isinstance(self.tasks_config, dict) else {}
+        
+        # Same task configuration for both agents
+        task_description = handle_cfg.get('description', 'Handle customer support inquiry and provide helpful response')
+        task_expected_output = handle_cfg.get('expected_output', 'A helpful and professional response to the customer\'s inquiry')
+        
         red_task = Task(
-            description=handle_cfg.get('description', 'Handle customer inquiry'),
-            expected_output=handle_cfg.get('expected_output', 'A helpful response'),
+            description=task_description,
+            expected_output=task_expected_output,
             agent=red_agent,
             context=handle_cfg.get('context', []),
             output_file=handle_cfg.get('output_file'),
             human_input=handle_cfg.get('human_input', False)
         )
         
-        mem_demo_cfg = self.tasks_config.get('tasks', {}).get('memory_demonstration', {}) if isinstance(self.tasks_config, dict) else {}
         blue_task = Task(
-            description=mem_demo_cfg.get('description', 'Demonstrate memory capabilities'),
-            expected_output=mem_demo_cfg.get('expected_output', 'A response using previous context'),
+            description=task_description,
+            expected_output=task_expected_output,
             agent=blue_agent,
-            context=mem_demo_cfg.get('context', []),
-            output_file=mem_demo_cfg.get('output_file'),
-            human_input=mem_demo_cfg.get('human_input', False)
+            context=handle_cfg.get('context', []),
+            output_file=handle_cfg.get('output_file'),
+            human_input=handle_cfg.get('human_input', False)
         )
         
         # Create crews
@@ -110,11 +126,10 @@ class MemoryComparisonDemo:
         )
     
     def process_red_co_message(self, message):
-        """Process message through Red.Co crew (no memory) using actual LLM"""
+        """Process message through Red.Co crew (no memory)"""
         try:
-            # Update the Red.Co task with the customer's message and run without memory
-            handle_cfg = self.tasks_config.get('tasks', {}).get('handle_customer_inquiry', {}) if isinstance(self.tasks_config, dict) else {}
-            original_description = handle_cfg.get('description', 'Handle customer inquiry and provide helpful response')
+            # Update the task with the customer's message
+            original_description = self.tasks_config['tasks']['handle_customer_inquiry']['description']
             self.red_crew.tasks[0].description = f"{original_description}\n\nCustomer inquiry: {message}"
 
             result = self.red_crew.kickoff()
@@ -143,9 +158,11 @@ class MemoryComparisonDemo:
         """Process message through Blue.Co crew (with memory)"""
         try:
             # Update task description with the customer message
-            original_description = self.tasks_config['tasks']['memory_demonstration']['description']
+            original_description = self.tasks_config['tasks']['handle_customer_inquiry']['description']
             self.blue_crew.tasks[0].description = f"{original_description}\n\nCustomer inquiry: {message}"
+            
             result = self.blue_crew.kickoff()
+            
             # Handle different result formats
             if hasattr(result, 'raw'):
                 response_text = result.raw
@@ -170,11 +187,15 @@ class MemoryComparisonDemo:
     def get_memory_info(self):
         """Get memory storage information for Blue.Co"""
         try:
-            # Basic memory info - CrewAI handles storage internally
+            # Show the actual storage directory being used by Demo 1
+            storage_path = os.environ.get('CREWAI_STORAGE_DIR', 'Default CrewAI storage location')
+            
             return {
-                "storage_path": "Managed by CrewAI",
+                "storage_path": storage_path,
                 "memory_enabled": True,
-                "memory_type": "Basic CrewAI Memory"
+                "memory_type": "CrewAI Basic Memory System",
+                "demo": "Demo 1 - Memory Comparison",
+                "note": "Using LL3/storage/demo1/ directory"
             }
         except Exception as e:
             return {
@@ -230,11 +251,13 @@ def run_demo():
     print("🚀 Starting Lightning Lesson 3 - Demo 1: Memory Comparison")
     print(f"📱 Red.Co (No Memory): http://localhost:{red_demo.red_port}")
     print(f"📱 Blue.Co (With Memory): http://localhost:{red_demo.blue_port}")
+    print(f"💾 Demo 1 Storage: {os.environ.get('CREWAI_STORAGE_DIR', 'default')}")
     print("\n💡 Demo Instructions:")
     print("1. Open both URLs in separate browser windows")
-    print("2. Ask the same question in both chats")
-    print("3. Ask a follow-up question in both chats")
+    print("2. Ask the same question in both chats (e.g., 'I need help with my order')")
+    print("3. Ask a follow-up question in both chats (e.g., 'What's the status?')")
     print("4. Notice how Blue.Co remembers context while Red.Co doesn't")
+    print("5. Check /memory-info endpoint on Blue.Co to see storage location")
     print("\nPress Ctrl+C to stop the demo")
     
     try:
