@@ -12,6 +12,8 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser(description="Quickly inspect CrewAI memory contents")
 parser.add_argument("--demo", choices=["1", "2", "demo1", "demo2"], help="Select demo storage subfolder")
+parser.add_argument("--dump-all", action="store_true", help="Dump full ChromaDB collections (ids, documents, metadatas)")
+parser.add_argument("--limit", type=int, default=50, help="Max items to fetch per collection when dumping")
 args = parser.parse_args()
 
 # Set up the same environment as the selected demo
@@ -123,20 +125,33 @@ def quick_inspect():
                     count = collection.count()
                     collection_id = str(collection.id)[:8] if hasattr(collection.id, '__getitem__') else str(collection.id)[:8]
                     print(f"   📁 {collection.name} ({collection_id}...): {count} documents")
-                    
-                    if count > 0:
-                        # Get sample documents
-                        results = collection.get(limit=2, include=['documents', 'metadatas'])
-                        if results['documents']:
-                            print(f"      Sample documents:")
-                            for i, doc in enumerate(results['documents']):
-                                display_doc = doc[:150] + "..." if len(doc) > 150 else doc
-                                print(f"         Doc {i+1}: {display_doc}")
-                        
-                        if results['metadatas']:
-                            print(f"      Sample metadata:")
-                            for i, meta in enumerate(results['metadatas']):
-                                print(f"         Meta {i+1}: {meta}")
+
+                    if args.dump_all:
+                        fetch_limit = max(1, args.limit)
+                        # Fetch ids first then get full docs for determinism
+                        ids = collection.get(include=['metadatas'], limit=fetch_limit).get('ids', [])
+                        results = collection.get(ids=ids, include=['documents', 'metadatas']) if ids else {'documents': [], 'metadatas': [], 'ids': []}
+                        print(f"      ids: {results.get('ids', [])}")
+                        print(f"      documents:")
+                        for i, doc in enumerate(results.get('documents', [])):
+                            print(f"         Doc {i+1}: {doc}")
+                        print(f"      metadatas:")
+                        for i, meta in enumerate(results.get('metadatas', [])):
+                            print(f"         Meta {i+1}: {meta}")
+                    else:
+                        if count > 0:
+                            # Get sample documents
+                            results = collection.get(limit=2, include=['documents', 'metadatas'])
+                            if results['documents']:
+                                print(f"      Sample documents:")
+                                for i, doc in enumerate(results['documents']):
+                                    display_doc = doc[:150] + "..." if len(doc) > 150 else doc
+                                    print(f"         Doc {i+1}: {display_doc}")
+                            
+                            if results['metadatas']:
+                                print(f"      Sample metadata:")
+                                for i, meta in enumerate(results['metadatas']):
+                                    print(f"         Meta {i+1}: {meta}")
                 except Exception as e:
                     print(f"   ❌ Error reading {collection.name}: {e}")
         else:

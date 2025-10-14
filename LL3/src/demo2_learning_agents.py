@@ -63,11 +63,14 @@ class MemoryLearningListener(BaseEventListener):
         self.query_times = []
         self.save_times = []
         self.retrieval_times = []
+        self._event_seq = 0  # monotonically increasing event id
     
     def setup_listeners(self, crewai_event_bus):
         @crewai_event_bus.on(MemoryQueryStartedEvent)
         def on_memory_query_started(source, event: MemoryQueryStartedEvent):
+            self._event_seq += 1
             event_data = {
+                "id": self._event_seq,
                 "timestamp": time.time(),
                 "type": "MEMORY_QUERY_STARTED",
                 "query": event.query,
@@ -81,7 +84,9 @@ class MemoryLearningListener(BaseEventListener):
         @crewai_event_bus.on(MemoryQueryCompletedEvent)
         def on_memory_query_completed(source, event: MemoryQueryCompletedEvent):
             self.query_times.append(event.query_time_ms)
+            self._event_seq += 1
             event_data = {
+                "id": self._event_seq,
                 "timestamp": time.time(),
                 "type": "MEMORY_QUERY_COMPLETED",
                 "query": event.query,
@@ -94,7 +99,9 @@ class MemoryLearningListener(BaseEventListener):
         
         @crewai_event_bus.on(MemorySaveStartedEvent)
         def on_memory_save_started(source, event: MemorySaveStartedEvent):
+            self._event_seq += 1
             event_data = {
+                "id": self._event_seq,
                 "timestamp": time.time(),
                 "type": "MEMORY_SAVE_STARTED",
                 "value": event.value[:50] + "..." if len(event.value) > 50 else event.value,
@@ -107,7 +114,9 @@ class MemoryLearningListener(BaseEventListener):
         @crewai_event_bus.on(MemorySaveCompletedEvent)
         def on_memory_save_completed(source, event: MemorySaveCompletedEvent):
             self.save_times.append(event.save_time_ms)
+            self._event_seq += 1
             event_data = {
+                "id": self._event_seq,
                 "timestamp": time.time(),
                 "type": "MEMORY_SAVE_COMPLETED",
                 "value": event.value[:50] + "..." if len(event.value) > 50 else event.value,
@@ -120,7 +129,9 @@ class MemoryLearningListener(BaseEventListener):
         
         @crewai_event_bus.on(MemoryRetrievalStartedEvent)
         def on_memory_retrieval_started(source, event: MemoryRetrievalStartedEvent):
+            self._event_seq += 1
             event_data = {
+                "id": self._event_seq,
                 "timestamp": time.time(),
                 "type": "MEMORY_RETRIEVAL_STARTED",
                 "task_id": event.task_id,
@@ -132,7 +143,9 @@ class MemoryLearningListener(BaseEventListener):
         @crewai_event_bus.on(MemoryRetrievalCompletedEvent)
         def on_memory_retrieval_completed(source, event: MemoryRetrievalCompletedEvent):
             self.retrieval_times.append(event.retrieval_time_ms)
+            self._event_seq += 1
             event_data = {
+                "id": self._event_seq,
                 "timestamp": time.time(),
                 "type": "MEMORY_RETRIEVAL_COMPLETED",
                 "task_id": event.task_id,
@@ -250,7 +263,7 @@ class LearningAgentDemo:
             
             # Get learning context for Long-Term Memory demonstration
             learning_context = self.get_learning_context()
-            
+
             task_description = f"""Handle customer support inquiry using Long-Term Memory to improve responses.
 
 LEARNING PROGRESS: {learning_context}
@@ -469,10 +482,10 @@ def memory_inspect():
         except Exception as e:
             inspection_results["errors"].append(f"Task DB error: {str(e)}")
     
-    # Inspect ChromaDB collections
+    # Inspect ChromaDB collections using CrewAI's shared client to avoid settings conflicts
     try:
-        import chromadb
-        client = chromadb.PersistentClient(path=storage_path)
+        from crewai.rag.config.utils import get_rag_client
+        client = get_rag_client()
         collections = client.list_collections()
         
         for collection in collections:
@@ -493,6 +506,51 @@ def memory_inspect():
         inspection_results["errors"].append(f"ChromaDB error: {str(e)}")
     
     return jsonify(inspection_results)
+
+@app.route('/chromadb-dump', methods=['GET'])
+def chromadb_dump():
+    """Dump ChromaDB collections for debugging. Use ?limit=N to cap results."""
+    storage_path = os.environ.get('CREWAI_STORAGE_DIR', './storage')
+    limit_str = request.args.get('limit', default='50')
+    try:
+        limit = max(1, int(limit_str))
+    except ValueError:
+        limit = 50
+
+    dump = {
+        "storage_path": storage_path,
+        "collections": [],
+        "errors": []
+    }
+
+    try:
+        from crewai.rag.config.utils import get_rag_client
+        client = get_rag_client()
+        for collection in client.list_collections():
+            try:
+                # Retrieve all ids first to page results deterministically
+                ids = collection.get(include=["metadatas"], limit=limit).get("ids", [])
+                results = collection.get(ids=ids, include=["documents", "metadatas"]) if ids else {"documents": [], "metadatas": [], "ids": []}
+                dump["collections"].append({
+                    "name": collection.name,
+                    "id": str(collection.id),
+                    "count": collection.count(),
+                    "sample": {
+                        "ids": results.get("ids", []),
+                        "documents": results.get("documents", []),
+                        "metadatas": results.get("metadatas", [])
+                    }
+                })
+            except Exception as e:  # pragma: no cover
+                dump["collections"].append({
+                    "name": collection.name,
+                    "id": str(collection.id),
+                    "error": str(e)
+                })
+    except Exception as e:  # pragma: no cover
+        dump["errors"].append(f"ChromaDB error: {str(e)}")
+
+    return jsonify(dump)
 
 @app.route('/learning-demo', methods=['POST'])
 def learning_demo():

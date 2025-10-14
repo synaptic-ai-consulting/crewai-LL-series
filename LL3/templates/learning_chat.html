@@ -272,6 +272,7 @@
         let currentScenario = '';
         let eventCount = 0;
         let patternCount = 0;
+        const seenEventIds = new Set();
 
         function addMessage(content, isUser = false, hasMemory = false, customerId = null) {
             const chatContainer = document.getElementById('chatContainer');
@@ -302,9 +303,10 @@
             const eventDiv = document.createElement('div');
             
             let eventClass = 'event-item';
-            if (event.type === 'MEMORY_SAVE') eventClass += ' event-memory-save';
-            else if (event.type === 'MEMORY_QUERY') eventClass += ' event-memory-query';
-            else if (event.type === 'MEMORY_RETRIEVAL') eventClass += ' event-memory-retrieval';
+            const t = (event.type || '').toString();
+            if (t.startsWith('MEMORY_SAVE')) eventClass += ' event-memory-save';
+            else if (t.startsWith('MEMORY_QUERY')) eventClass += ' event-memory-query';
+            else if (t.startsWith('MEMORY_RETRIEVAL')) eventClass += ' event-memory-retrieval';
             
             eventDiv.className = eventClass;
             eventDiv.innerHTML = `
@@ -322,6 +324,18 @@
             
             eventCount++;
             updateStats();
+        }
+
+        function maybeAddEvents(events) {
+            if (!Array.isArray(events)) return;
+            // Ensure ascending order so oldest appears lower, newest on top when inserted
+            events.sort((a, b) => (a.id || 0) - (b.id || 0));
+            for (const ev of events) {
+                const id = ev.id || `${ev.type}-${ev.timestamp}`;
+                if (seenEventIds.has(id)) continue;
+                addEvent(ev);
+                seenEventIds.add(id);
+            }
         }
 
         function updateStats() {
@@ -365,7 +379,7 @@
                         
                         // Add learning events
                         if (resp.response.learning_events) {
-                            resp.response.learning_events.forEach(event => addEvent(event));
+                            maybeAddEvents(resp.response.learning_events);
                         }
                         
                         // Update progress
@@ -415,7 +429,7 @@
                     
                     // Add learning events
                     if (data.learning_events) {
-                        data.learning_events.forEach(event => addEvent(event));
+                        maybeAddEvents(data.learning_events);
                     }
                     
                     // Update progress
@@ -528,8 +542,7 @@
             fetch('/memory-events')
             .then(response => response.json())
             .then(events => {
-                // Only add new events (this is a simple implementation)
-                // In a real app, you'd track which events you've already displayed
+                maybeAddEvents(events);
             })
             .catch(error => {
                 // Silently handle errors for auto-refresh
