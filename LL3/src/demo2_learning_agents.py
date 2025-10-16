@@ -214,7 +214,7 @@ class LearningAgentDemo:
     def setup_learning_crew(self):
         """Setup learning agent with basic CrewAI memory capabilities"""
         
-        # Initialize LLM
+        # Initialize LLM using CrewAI's LLM wrapper 
         llm = LLM(model="gpt-4o-mini")
         
         # Learning Agent (With Basic Memory and Custom Templates)

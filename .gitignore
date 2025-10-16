@@ -97,6 +97,10 @@ artifacts/
 LL*/docs/
 docs/
 
+# Storage directories - Keep storage private for all LL folders
+LL*/storage/
+storage/
+
 # Logs
 *.log
 logs/
