@@ -6,10 +6,12 @@ This lesson demonstrates CrewAI's advanced memory architecture through two progr
 
 ### Learning Objectives
 ⚡ **Architect Multi-Layer Memory Systems for Enterprise Scale**
-
 ⚡ **Build Self-Improving Agents Through Memory Optimization**
-
 ⚡ **Implement Production-Ready Memory Performance Patterns**
+
+**Resources**:
+- Recording: [Advanced Agent Memory & Learning Demo Live Session](https://maven.com/p/1e8491/build-scalable-multiagent-memory-architectures?utm_medium=github_link)
+- Slides:[Advanced Agent Memory & Learning Demo Slides](https://maven.com/p/658e0c/advanced-agent-memory-learning-demo)
 
 ---
 
@@ -252,3 +254,18 @@ For issues or questions:
 4. Ensure all dependencies are properly installed
 
 **Happy Learning!** 🚀
+
+---
+
+## Related Resources
+
+- CrewAI Documentation: https://docs.crewai.com/
+- Customizing Prompts: https://docs.crewai.com/en/guides/advanced/customizing-prompts
+- Memory Concepts: https://docs.crewai.com/en/concepts/memory
+- Live session recording: Advanced Agent Memory & Learning Demo (Lesson 3)
+  - https://maven.com/p/1e8491/build-scalable-multiagent-memory-architectures?utm_medium=github_link
+
+
+  ---
+
+**Note**: This demo is designed for educational purposes and showcases CrewAI's memory architecture and learning capabilities from Lightning Lesson 3. For production use, ensure proper error handling, security considerations, and performance optimization. Always inspect what prompts are being sent to your LLM for full transparency.

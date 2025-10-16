@@ -8,7 +8,9 @@ This demo showcases CrewAI's prompt injection system and advanced prompt customi
 - **Multiple Customization Approaches**: Custom templates, crew-level JSON, model-specific formatting
 - **Enterprise Persona Types**: Legal, Marketing, and Technical personas with distinct characteristics
 
-Note: A full live session recording that walks through these concepts is available here: [Advanced Prompt Engineering & Agent Personas](https://maven.com/p/c5faf1/advanced-prompt-engineering-agent-personas).
+**Resources**:
+- Recording: [Advanced Agent Persona Architecture Live Session](https://maven.com/p/c5faf1/crew-ai-lightning-lesson-series-ll2)
+- Slides:[Advanced Agent Persona Architecture Slides](https://maven.com/p/22eff5/advanced-agent-persona-architecture?utm_medium=github_link)
 
 ## Project Structure
 ```

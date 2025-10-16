@@ -21,6 +21,12 @@ This demo demonstrates the strategic decision-making framework between CrewAI Fl
 - **Use Case**: Enterprise systems requiring both control and creativity
 - **Characteristics**: Optimal balance, scalable, maintainable
 
+**Resources**:
+- Slides: [CrewAI Lightning Lesson Series LL1](https://maven.com/p/8f14d5/crew-ai-lightning-lesson-series-ll1)
+- Recording:[Flows vs. Crews Live Session](https://maven.com/p/949161/flows-vs-crews-demo?utm_medium=github_link)
+
+---
+
 ## Architecture & Flow Diagrams
 
 The following diagrams illustrate how users interact with each approach and how LLMs are invoked. Each solution is shown separately for clarity:

@@ -22,6 +22,10 @@ The CrewAI Lightning Lessons Series focuses on **non-obvious, enterprise-grade c
 - ⚡ Design Hybrid Systems Combining Flows and Crews
 - ⚡ Apply Strategic Decision Framework for Automation
 
+**Resources**:
+- Slides: [CrewAI Lightning Lesson Series LL1](https://maven.com/p/8f14d5/crew-ai-lightning-lesson-series-ll1)
+- Recording:[Flows vs. Crews Live Session](https://maven.com/p/949161/flows-vs-crews-demo?utm_medium=github_link)
+
 ---
 
 ### 2. **Advanced Agent Persona Architecture** *(September 29th)*
@@ -38,6 +42,10 @@ The CrewAI Lightning Lessons Series focuses on **non-obvious, enterprise-grade c
 - ⚡ Implement Multiple Prompt Customization Approaches
 - ⚡ Design Agent Personas for Enterprise Brand Consistency
 
+**Resources**:**Resources**:
+- Recording: [Advanced Agent Persona Architecture Live Session](https://maven.com/p/c5faf1/crew-ai-lightning-lesson-series-ll2)
+- Slides:[Advanced Agent Persona Architecture Slides](https://maven.com/p/22eff5/advanced-agent-persona-architecture?utm_medium=github_link)
+
 ---
 
 ### 3. **Advanced Memory Architecture: Building Intelligent Agents That Learn** *(October 13th)*
@@ -53,6 +61,10 @@ The CrewAI Lightning Lessons Series focuses on **non-obvious, enterprise-grade c
 - ⚡ Architect Multi-Layer Memory Systems for Enterprise Scale
 - ⚡ Build Self-Improving Agents Through Memory Optimization
 - ⚡ Implement Production-Ready Memory Performance Patterns
+
+**Resources**:
+- Recording: [Advanced Agent Memory & Learning Demo Live Session](https://maven.com/p/1e8491/build-scalable-multiagent-memory-architectures?utm_medium=github_link)
+- Slides:[Advanced Agent Memory & Learning Demo Slides](https://maven.com/p/658e0c/advanced-agent-memory-learning-demo)
 
 ---
 
