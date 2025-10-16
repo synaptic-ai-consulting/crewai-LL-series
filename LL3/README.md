@@ -15,13 +15,7 @@ This lesson demonstrates CrewAI's advanced memory architecture through two progr
 
 ## Demo Structure
 
-### Demo 1: Memory vs No-Memory Comparison
-**Port**: 8000 (Red.Co - No Memory) vs 8001 (Blue.Co - With Memory)
-- Side-by-side comparison showing the value of memory
-- Red.Co agent starts fresh each time
-- Blue.Co agent remembers context across interactions
-
-### Demo 2: Learning Agent with Conversational Continuity ⭐
+### Learning Agent with Conversational Continuity ⭐
 **Port**: 8002 (Learning Agent with Memory Events)
 - **Enhanced Features**:
   - Bidirectional scenario navigation (← Previous, Next →)
@@ -65,12 +59,10 @@ cp env.example .env
 # Optional: CREWAI_STORAGE_DIR (defaults to ./storage)
 ```
 
-### Running Demos
-
-#### Demo 2: Learning Agent (Recommended)
+### Running the Demo
 ```bash
-# Run the enhanced learning agent demo
-python src/demo2_learning_agents.py
+# Run the learning agent demo
+python run_demo.py
 ```
 
 **Features to demonstrate**:
@@ -79,15 +71,7 @@ python src/demo2_learning_agents.py
 3. **Memory Events**: Watch the real-time memory event panel showing save/query/retrieval operations
 4. **Memory Inspection**: Run `python src/quick_memory_inspect.py` in another terminal to see actual stored data
 
-#### All Demos
-```bash
-# Run all demos in sequence
-python run_demo.py
-
-# Run specific demo
-python run_demo.py --demo 1    # Memory comparison
-python run_demo.py --demo 2    # Learning agent
-```
+ 
 
 ---
 
@@ -167,8 +151,6 @@ LL3/storage/
 
 ### Agent Configuration (`config/agents.yaml`)
 - **learning_agent**: Enhanced agent with conversational continuity
-- **red_co_support**: Basic agent without memory
-- **blue_co_support**: Agent with basic memory
 
 ### Task Configuration (`config/tasks.yaml`)
 - **learn_resolution_pattern**: Updated to emphasize conversational continuity
@@ -177,8 +159,6 @@ LL3/storage/
 ### Prompt Templates (`prompts/`)
 - **learning_agent.txt**: Conversational continuity instructions
 - **custom_prompts.json**: Memory-specific prompt slices
-- **red_co_support.txt**: Basic support without memory awareness
-- **blue_co_support.txt**: Memory-aware support agent
 
 ---
 
