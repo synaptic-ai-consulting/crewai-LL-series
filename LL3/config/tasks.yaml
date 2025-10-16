@@ -6,39 +6,13 @@ tasks:
     description: "Handle customer support inquiry and provide helpful response"
     expected_output: "A helpful and professional response to the customer's inquiry"
     agent: "customer_support_agent"
-    context:
-      - "Customer inquiry details"
-      - "Previous interaction history (if available)"
     output_file: "artifacts/customer_response.md"
     human_input: false
 
   learn_resolution_pattern:
-    description: "Learn from customer interaction and store resolution pattern for future use"
-    expected_output: "Resolution pattern stored in memory for future similar situations"
+    description: "Continue the customer support conversation naturally, using both Short-Term Memory for conversational context and Long-Term Memory for learned patterns. Respond as if you're having a continuous chat conversation, not starting fresh each time."
+    expected_output: "A natural continuation of the customer support conversation that maintains context and provides helpful assistance"
     agent: "learning_agent"
-    context:
-      - "Customer complaint details"
-      - "Resolution steps taken"
-      - "Customer satisfaction level"
     output_file: "artifacts/learning_pattern.md"
     human_input: false
 
-  performance_test_inquiry:
-    description: "Handle customer inquiry under performance testing conditions"
-    expected_output: "Fast and accurate response to customer inquiry"
-    agent: "performance_agent"
-    context:
-      - "Customer inquiry details"
-      - "Performance metrics tracking"
-    output_file: "artifacts/performance_response.md"
-    human_input: false
-
-  memory_demonstration:
-    description: "Demonstrate memory capabilities by handling follow-up questions with context"
-    expected_output: "Response that shows memory of previous conversation context"
-    agent: "memory_agent"
-    context:
-      - "Current customer question"
-      - "Previous conversation history"
-    output_file: "artifacts/memory_demo_response.md"
-    human_input: false
