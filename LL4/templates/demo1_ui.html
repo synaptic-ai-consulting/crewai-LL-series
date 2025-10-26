@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo 1: Adaptive Questioning</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 40px;
+        }
+        .demo-section {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+        .demo-section h2 {
+            color: #495057;
+            margin: 0 0 20px 0;
+            font-size: 1.4em;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border: none;
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 5px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .status {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #1976d2;
+        }
+        .status h3 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .feedback-form {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .feedback-form h3 {
+            margin: 0 0 15px 0;
+            color: #856404;
+        }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #495057;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+        }
+        .log {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+        .log-entry.info { color: #66d9ef; }
+        .log-entry.success { color: #a6e22e; }
+        .log-entry.warning { color: #f4bf75; }
+        .log-entry.error { color: #f92672; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Demo 1: Adaptive Questioning</h1>
+            <p>Content Research Approval with Context-Aware Follow-up Questions</p>
+        </div>
+        
+        <div class="content">
+            <div class="demo-section">
+                <h2>🚀 Demo Controls</h2>
+                <p>This demo shows webhook-based HITL with adaptive questioning. The agent will research AI automation trends and wait for your feedback before proceeding.</p>
+                
+                <button id="startDemo" class="btn" onclick="startDemo()">Start Research Task</button>
+                <button id="checkStatus" class="btn" onclick="checkStatus()">Check Status</button>
+                <a href="/" class="btn">← Back to Demos</a>
+            </div>
+            
+            <div class="status" id="statusSection" style="display: none;">
+                <h3>📊 Demo Status</h3>
+                <div id="statusContent">Waiting for demo to start...</div>
+            </div>
+            
+            <div class="demo-section" id="outputSection" style="display: none;">
+                <h2>📝 Research Output</h2>
+                <div id="researchOutput" class="output">No output yet...</div>
+            </div>
+            
+            <div class="feedback-form" id="feedbackSection" style="display: none;">
+                <h3>💬 Human Feedback Required</h3>
+                <p>The research task has completed and is waiting for your review. Please provide feedback to help the agent improve.</p>
+                
+                <form id="feedbackForm">
+                    <div class="form-group">
+                        <label for="feedback">Your Feedback:</label>
+                        <textarea id="feedback" name="feedback" placeholder="Provide specific feedback to help improve the research..."></textarea>
+                    </div>
+                    
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="approve" name="approve">
+                        <label for="approve">Approve this output (check to approve, leave unchecked to request improvements)</label>
+                    </div>
+                    
+                    <button type="submit" class="btn">Submit Feedback</button>
+                </form>
+            </div>
+            
+            <div class="demo-section">
+                <h2>📋 Demo Log</h2>
+                <div id="demoLog" class="log">
+                    <div class="log-entry info">Ready to start demo...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let pollInterval = null;
+        
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('demoLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${timestamp}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function startDemo() {
+            log('Starting Demo 1: Adaptive Questioning...', 'info');
+            
+            // Disable start button
+            document.getElementById('startDemo').disabled = true;
+            document.getElementById('startDemo').textContent = 'Demo Running...';
+            
+            // Show status section
+            document.getElementById('statusSection').style.display = 'block';
+            document.getElementById('statusContent').textContent = 'Demo is running... Check the terminal for crew execution.';
+            
+            // Start polling for webhook notifications
+            startPolling();
+            
+            log('Demo started! The crew is now executing. Watch for webhook notifications...', 'success');
+        }
+        
+        function startPolling() {
+            pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/pending-reviews');
+                    const reviews = await response.json();
+                    
+                    if (reviews.length > 0) {
+                        const latestReview = reviews[reviews.length - 1];
+                        if (latestReview.status === 'pending_review') {
+                            handleWebhookNotification(latestReview);
+                        }
+                    }
+                } catch (error) {
+                    log(`Polling error: ${error.message}`, 'error');
+                }
+            }, 2000); // Poll every 2 seconds
+        }
+        
+        function handleWebhookNotification(review) {
+            log(`Webhook notification received: ${review.task_id}`, 'success');
+            
+            currentExecutionId = review.execution_id;
+            
+            // Show output section
+            document.getElementById('outputSection').style.display = 'block';
+            document.getElementById('researchOutput').textContent = review.task_output;
+            
+            // Show feedback section
+            document.getElementById('feedbackSection').style.display = 'block';
+            
+            // Update status
+            document.getElementById('statusContent').textContent = `Task completed! Agent: ${review.agent_role}. Waiting for human feedback...`;
+            
+            // Stop polling
+            if (pollInterval) {
+                clearInterval(pollInterval);
+                pollInterval = null;
+            }
+        }
+        
+        function checkStatus() {
+            log('Checking demo status...', 'info');
+            
+            fetch('/api/pending-reviews')
+                .then(response => response.json())
+                .then(reviews => {
+                    if (reviews.length > 0) {
+                        log(`Found ${reviews.length} pending reviews`, 'info');
+                        reviews.forEach(review => {
+                            log(`- ${review.task_id}: ${review.status}`, 'info');
+                        });
+                    } else {
+                        log('No pending reviews found', 'warning');
+                    }
+                })
+                .catch(error => {
+                    log(`Status check error: ${error.message}`, 'error');
+                });
+        }
+        
+        document.getElementById('feedbackForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const feedback = document.getElementById('feedback').value;
+            const approve = document.getElementById('approve').checked;
+            
+            if (!currentExecutionId) {
+                log('No execution ID available', 'error');
+                return;
+            }
+            
+            log(`Submitting feedback: ${approve ? 'APPROVED' : 'NEEDS IMPROVEMENT'}`, 'info');
+            
+            try {
+                const response = await fetch('/resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        execution_id: currentExecutionId,
+                        task_id: 'research_task',
+                        human_feedback: feedback,
+                        is_approve: approve
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    log('Feedback submitted successfully!', 'success');
+                    document.getElementById('feedbackSection').style.display = 'none';
+                    document.getElementById('statusContent').textContent = 'Feedback submitted. Crew execution resumed.';
+                } else {
+                    log(`Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log(`Submission error: ${error.message}`, 'error');
+            }
+        });
+        
+        // Initialize
+        log('Demo 1 UI loaded. Click "Start Research Task" to begin.', 'info');
+    </script>
+</body>
+</html>
+

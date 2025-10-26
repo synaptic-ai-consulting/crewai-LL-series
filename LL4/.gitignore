@@ -1,0 +1,39 @@
+# LL4 Demo Project .gitignore
+
+# Test folder - contains test scripts and utilities
+test/
+
+# Environment variables
+.env
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# Demo artifacts (if any)
+artifacts/
+*.md.bak
+

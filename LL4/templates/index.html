@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CrewAI HITL Demos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .demos {
+            padding: 40px;
+        }
+        .demo-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 30px;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .demo-card h2 {
+            color: #495057;
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+        }
+        .demo-card p {
+            color: #6c757d;
+            margin: 0 0 20px 0;
+            line-height: 1.6;
+        }
+        .demo-card .features {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .demo-card .features li {
+            padding: 5px 0;
+            color: #495057;
+        }
+        .demo-card .features li:before {
+            content: "✓ ";
+            color: #28a745;
+            font-weight: bold;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .status {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #1976d2;
+        }
+        .status h3 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 CrewAI HITL Demos</h1>
+            <p>Human-in-the-Loop Design Patterns with Webhook Architecture</p>
+        </div>
+        
+        <div class="demos">
+            <div class="status">
+                <h3>📋 Demo Status</h3>
+                <p>Select a demo to explore different HITL patterns. Each demo showcases webhook-based human-in-the-loop workflows with CrewAI.</p>
+            </div>
+            
+            <div class="demo-card" onclick="window.location.href='/demo1'">
+                <h2>🎯 Demo 1: Adaptive Questioning</h2>
+                <p>Content Research Approval with Context-Aware Follow-up Questions</p>
+                <ul class="features">
+                    <li>Webhook-based HITL notifications</li>
+                    <li>Bearer token authentication</li>
+                    <li>Adaptive questioning based on human feedback</li>
+                    <li>Single-agent workflow with human gates</li>
+                </ul>
+                <a href="/demo1" class="btn">Start Demo 1</a>
+            </div>
+            
+            <div class="demo-card" onclick="window.location.href='/demo2'">
+                <h2>🔄 Demo 2: Iterative Refinement</h2>
+                <p>Blog Post Drafting with Progressive Improvement Through Human Feedback</p>
+                <ul class="features">
+                    <li>Multi-iteration feedback loops</li>
+                    <li>Feedback accumulation and learning</li>
+                    <li>Iteration history tracking</li>
+                    <li>Progressive content improvement</li>
+                </ul>
+                <a href="/demo2" class="btn">Start Demo 2</a>
+            </div>
+            
+            <div class="demo-card" onclick="window.location.href='/demo3'">
+                <h2>🤝 Demo 3: Multi-Agent Workflow</h2>
+                <p>Full Content Pipeline (Research → Draft → Edit) with Human Approval Gates</p>
+                <ul class="features">
+                    <li>Multi-agent sequential workflow</li>
+                    <li>Human gates between agent handoffs</li>
+                    <li>Context flow between agents</li>
+                    <li>Enterprise-grade HITL architecture</li>
+                </ul>
+                <a href="/demo3" class="btn">Start Demo 3</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
