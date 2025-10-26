@@ -35,14 +35,28 @@ def load_agents():
     
     return agents
 
-def create_simple_hitl_task(agent):
+def create_simple_hitl_task(agent, topic):
     """Create a simple task with human input enabled."""
     return Task(
-        description="Write a brief summary of the latest AI trends in 2-3 paragraphs. Focus on the most impactful developments.",
-        expected_output="A concise 2-3 paragraph summary of current AI trends with key insights",
+        description=f"Write a brief summary of the latest {topic} trends in 2-3 paragraphs. Focus on the most impactful developments.",
+        expected_output=f"A concise 2-3 paragraph summary of current {topic} trends with key insights",
         agent=agent,
         human_input=True  # This enables HITL in open source CrewAI
     )
+
+def get_user_topic():
+    """Prompt user for a topic."""
+    print("📝 Please enter a topic for the research:")
+    print("   Examples: AI, Machine Learning, Blockchain, Cybersecurity, etc.")
+    print()
+    
+    while True:
+        topic = input("🎯 Topic: ").strip()
+        if topic:
+            print(f"✅ Selected topic: {topic}")
+            return topic
+        else:
+            print("❌ Please enter a valid topic")
 
 def run_opensource_hitl_demo():
     """Run Demo 1: Open Source HITL."""
@@ -52,12 +66,16 @@ def run_opensource_hitl_demo():
     print("The execution will pause and wait for human feedback in the console")
     print()
     
+    # Get topic from user
+    topic = get_user_topic()
+    print()
+    
     # Load configuration
     agents = load_agents()
     researcher = agents['content_researcher']
     
-    # Create a simple HITL task
-    hitl_task = create_simple_hitl_task(researcher)
+    # Create a simple HITL task with user's topic
+    hitl_task = create_simple_hitl_task(researcher, topic)
     
     print(f"👤 Agent: {researcher.role}")
     print(f"📋 Task: {hitl_task.description}")
@@ -86,7 +104,7 @@ def run_opensource_hitl_demo():
         
         # This will actually pause for human input in open source CrewAI
         result = crew.kickoff(
-            inputs={"topic": "AI Trends 2025"}
+            inputs={"topic": topic}
         )
         
         print("\n✅ Crew execution completed!")
@@ -113,6 +131,7 @@ def main():
     print("🎯 Demo 1: Open Source HITL")
     print("This demo shows basic human_input=True functionality")
     print("in open source CrewAI (console-based HITL)")
+    print("You'll be prompted to enter a topic for research")
     print()
     
     try:
