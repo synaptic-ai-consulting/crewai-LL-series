@@ -48,11 +48,11 @@ def start_webhook_server():
     time.sleep(2)
     print("✅ Webhook server started on port 5000")
 
-def run_demo(demo_number):
+def run_demo(demo_number, polling=False):
     """Run a specific demo."""
     demo_scripts = {
         1: 'src/demo1_opensource_hitl.py',
-        2: 'src/demo2_enterprise_webhook_hitl.py',
+        2: 'src/demo2_enterprise_webhook_hitl.py',  # Default to polling CLI
         3: 'src/demo3_multi_agent_handoff.py'
     }
     
@@ -60,7 +60,17 @@ def run_demo(demo_number):
         print(f"❌ Demo {demo_number} not found")
         return False
     
-    script_path = demo_scripts[demo_number]
+    # For Demo 2, choose between webhook (launcher) or polling (CLI)
+    if demo_number == 2:
+        if polling:
+            script_path = 'src/demo2_enterprise_webhook_hitl.py'
+            print("🔄 Using polling-based HITL (backup mode)")
+        else:
+            script_path = 'src/demo2_amp_deploy_first.py'
+            print("🔗 Using webhook-based HITL with full UI")
+    else:
+        script_path = demo_scripts[demo_number]
+    
     if not os.path.exists(script_path):
         print(f"❌ Demo script not found: {script_path}")
         return False
@@ -82,8 +92,8 @@ def run_demo(demo_number):
 def list_demos():
     """List available demos."""
     print("📋 Available Demos:")
-    print("1. Open Source HITL - Basic human_input=True functionality in open source CrewAI")
-    print("2. Enterprise Webhook HITL - Advanced webhook-based HITL with UI integration")
+    print("1. Open Source HITL - Iterative refinement with human feedback in open source CrewAI")
+    print("2. Enterprise Webhook HITL - Multi-agent content pipeline with human gate approvals using CrewAI AMP")
     print("3. Multi-Agent Workflow - Sequential agents with human gates")
     print()
     print("Usage: python run_demo.py --demo <number>")
@@ -114,6 +124,11 @@ def validate_setup():
         
         if not os.getenv('OPENAI_API_KEY'):
             issues.append("OPENAI_API_KEY not set in .env file")
+        
+        # Check for CrewAI AMP API key (optional for Demo 2)
+        crewai_api_key = os.getenv('CREWAI_API_KEY')
+        if not crewai_api_key:
+            print("💡 Note: CREWAI_API_KEY not set - Demo 2 will run in simulation mode")
     
     if issues:
         print("❌ Setup issues found:")
@@ -129,6 +144,8 @@ def main():
     parser = argparse.ArgumentParser(description='CrewAI HITL Demo Runner')
     parser.add_argument('--demo', type=int, choices=[1, 2, 3], 
                        help='Run specific demo (1, 2, or 3)')
+    parser.add_argument('--polling', action='store_true',
+                       help='Use polling-based HITL instead of webhooks (Demo 2 only)')
     parser.add_argument('--list-demos', action='store_true',
                        help='List available demos')
     parser.add_argument('--validate', action='store_true',
@@ -167,17 +184,21 @@ def main():
             print("❌ Setup validation failed. Run with --setup to fix issues.")
             sys.exit(1)
         
-        # Start webhook server
-        start_webhook_server()
+        # Only start webhook server for Demo 1 (Demo 2 has its own backend in demo2_amp_deploy_first.py)
+        if args.demo == 1:
+            start_webhook_server()
+            print(f"\n🌐 Webhook server running at: http://localhost:5000")
+            print(f"🎯 Demo {args.demo} UI: http://localhost:5000/demo{args.demo}")
+        elif args.demo == 2 and not args.polling:
+            print(f"\n🌐 Demo 2 will start its own services (ngrok, backend, frontend)")
+            print(f"🎯 Frontend will be available at: http://localhost:3000")
         
-        print(f"\n🌐 Webhook server running at: http://localhost:5000")
-        print(f"🎯 Demo {args.demo} UI: http://localhost:5000/demo{args.demo}")
         print("\nPress Ctrl+C to stop the demo")
         print("=" * 60)
         
         try:
-            # Run the demo
-            success = run_demo(args.demo)
+            # Run the demo with polling flag
+            success = run_demo(args.demo, polling=args.polling)
             if success:
                 print(f"\n✅ Demo {args.demo} completed successfully!")
             else:
@@ -191,12 +212,13 @@ def main():
     else:
         print("🎯 CrewAI HITL Demos")
         print("\nAvailable commands:")
-        print("  python run_demo.py --demo 1    # Open Source HITL")
-        print("  python run_demo.py --demo 2    # Enterprise Webhook HITL") 
-        print("  python run_demo.py --demo 3    # Multi-Agent Workflow")
-        print("  python run_demo.py --list-demos # List all demos")
-        print("  python run_demo.py --validate   # Validate setup")
-        print("  python run_demo.py --setup     # Setup environment")
+        print("  python run_demo.py --demo 1           # Open Source HITL - Iterative Refinement")
+        print("  python run_demo.py --demo 2           # Enterprise Webhook HITL - Full UI (default)")
+        print("  python run_demo.py --demo 2 --polling # Enterprise HITL - Polling-based (backup)")
+        print("  python run_demo.py --demo 3           # Multi-Agent Workflow")
+        print("  python run_demo.py --list-demos       # List all demos")
+        print("  python run_demo.py --validate         # Validate setup")
+        print("  python run_demo.py --setup            # Setup environment")
 
 if __name__ == "__main__":
     main()

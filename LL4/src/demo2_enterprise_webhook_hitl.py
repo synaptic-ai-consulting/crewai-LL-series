@@ -1,264 +1,379 @@
 """
-Demo 2: Enterprise Webhook HITL - Advanced Human-in-the-Loop
-Content Research Approval with Webhook Integration and UI Feedback
+Demo 2: Enterprise Webhook HITL - Full Content Pipeline
+Web UI integration with deployed CrewAI AMP crew
 """
 
 import os
 import sys
-import time
 import requests
-from crewai import Crew, Agent, Task
-import yaml
+import json
+import time
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
-def load_agents():
-    """Load agents from YAML configuration."""
-    with open('config/agents.yaml', 'r') as f:
-        config = yaml.safe_load(f)
+class CrewAIAMPClient:
+    """Client for interacting with deployed CrewAI AMP crew."""
     
-    agents = {}
-    for agent_id, agent_config in config['agents'].items():
-        # Handle environment variable substitution
-        llm_model = agent_config.get('llm', 'openai')
-        if llm_model.startswith('${') and llm_model.endswith('}'):
-            env_var = llm_model[2:-1]  # Remove ${ and }
-            llm_model = os.getenv(env_var, 'gpt-3.5-turbo')
+    def __init__(self, crew_url, crew_token):
+        self.crew_url = crew_url
+        self.crew_token = crew_token
+        self.headers = {
+            'Authorization': f'Bearer {crew_token}',
+            'Content-Type': 'application/json'
+        }
+    
+    def start_execution(self, inputs):
+        """Start crew execution with given inputs."""
+        url = f"{self.crew_url}/api/crews/run"
+        payload = {"inputs": inputs}
         
-        agents[agent_id] = Agent(
-            role=agent_config['role'],
-            goal=agent_config['goal'],
-            backstory=agent_config['backstory'],
-            verbose=agent_config.get('verbose', True),
-            llm=llm_model
-        )
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error starting execution: {e}")
+            return None
     
-    return agents
-
-def load_tasks(agents):
-    """Load tasks from YAML configuration."""
-    with open('config/tasks.yaml', 'r') as f:
-        config = yaml.safe_load(f)
-    
-    tasks = {}
-    for task_id, task_config in config['tasks'].items():
-        agent = agents.get(task_config['agent'])
-        if not agent:
-            raise ValueError(f"Agent {task_config['agent']} not found")
+    def get_execution_status(self, execution_id):
+        """Get status of execution."""
+        url = f"{self.crew_url}/api/crews/status/{execution_id}"
         
-        tasks[task_id] = Task(
-            description=task_config['description'],
-            expected_output=task_config['expected_output'],
-            agent=agent,
-            human_input=task_config.get('human_input', False)
-        )
+        try:
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error getting status: {e}")
+            return None
     
-    return tasks
-
-def simulate_hitl_pause_and_webhook(result):
-    """Simulate HITL pause and send webhook notification to Flask server."""
-    print("⏸️  HITL PAUSE: Task completed, waiting for human feedback...")
-    print("📤 Sending webhook notification to Flask server...")
-    
-    webhook_url = "http://localhost:5000/hitl"
-    webhook_token = os.getenv('WEBHOOK_SECRET_TOKEN', 'demo-secret-token')
-    
-    # Prepare webhook payload
-    task_output = str(result.raw) if hasattr(result, 'raw') else str(result)
-    print(f"📝 Task output length: {len(task_output)} characters")
-    
-    payload = {
-        "execution_id": "demo-execution-123",
-        "task_id": "research_task",
-        "task_output": task_output,
-        "agent_role": "Content Researcher",
-        "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")
-    }
-    
-    headers = {
-        "Authorization": f"Bearer {webhook_token}",
-        "Content-Type": "application/json"
-    }
-    
-    try:
-        print(f"📤 Sending webhook notification to {webhook_url}")
-        response = requests.post(webhook_url, json=payload, headers=headers, timeout=5)
+    def resume_execution(self, execution_id, feedback=None):
+        """Resume execution with optional feedback."""
+        url = f"{self.crew_url}/api/crews/resume/{execution_id}"
+        payload = {"feedback": feedback} if feedback else {}
         
-        if response.status_code == 200:
-            print("✅ Webhook notification sent successfully!")
-            print("🌐 Check the web UI at http://localhost:5000/demo1")
-            print("💬 Provide feedback in the web UI to continue...")
-            
-            # Simulate waiting for human feedback
-            print("\n" + "="*60)
-            print("🤖 SIMULATED HITL PAUSE - Waiting for Human Feedback")
-            print("="*60)
-            print("In enterprise CrewAI, execution would pause here")
-            print("and wait for human feedback via webhook resume API")
-            print("\n📋 Task Output Preview:")
-            print("-" * 40)
-            print(task_output[:500] + "..." if len(task_output) > 500 else task_output)
-            print("-" * 40)
-            print("\n💡 This demonstrates the HITL concept:")
-            print("   1. Agent completes task")
-            print("   2. System pauses execution")
-            print("   3. Human reviews output via web UI")
-            print("   4. Human provides feedback")
-            print("   5. System resumes with feedback context")
-            print("\n⏳ Simulating human review process...")
-            time.sleep(3)  # Simulate human review time
-            print("✅ Human feedback received - continuing execution...")
-            
-        else:
-            print(f"⚠️ Webhook notification failed: {response.status_code}")
-            print("💡 Make sure the webhook server is running on port 5000")
-            print("🔄 Continuing with simulated HITL pause...")
-            simulate_console_hitl_pause(task_output)
-    
-    except requests.exceptions.ConnectionError:
-        print("⚠️ Could not connect to webhook server")
-        print("💡 Make sure to run: python run_demo.py --demo 2")
-        print("   This will start both the webhook server and the demo")
-        print("🔄 Continuing with simulated HITL pause...")
-        simulate_console_hitl_pause(task_output)
-    
-    except Exception as e:
-        print(f"⚠️ Webhook notification error: {str(e)}")
-        print("💡 The demo will continue without webhook integration")
-        print("🔄 Continuing with simulated HITL pause...")
-        simulate_console_hitl_pause(task_output)
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            return response.json()
+        except requests.exceptions.RequestException as e:
+            print(f"❌ Error resuming execution: {e}")
+            return None
 
-def simulate_console_hitl_pause(task_output):
-    """Simulate HITL pause with console interaction when webhook unavailable."""
-    print("\n" + "="*60)
-    print("🤖 SIMULATED HITL PAUSE - Console Interaction")
-    print("="*60)
-    print("In enterprise CrewAI, execution would pause here")
-    print("and wait for human feedback via webhook resume API")
-    print("\n📋 Task Output Preview:")
-    print("-" * 40)
-    print(task_output[:500] + "..." if len(task_output) > 500 else task_output)
-    print("-" * 40)
-    print("\n💡 This demonstrates the HITL concept:")
-    print("   1. Agent completes task")
-    print("   2. System pauses execution")
-    print("   3. Human reviews output")
-    print("   4. Human provides feedback")
-    print("   5. System resumes with feedback context")
-    print("\n🤔 Simulated human review process...")
-    print("   (In real HITL, human would review via web UI)")
-    time.sleep(2)  # Simulate human review time
-    print("✅ Human feedback received - continuing execution...")
-
-def run_enterprise_webhook_hitl_demo():
-    """Run Demo 2: Enterprise Webhook HITL."""
-    print("🚀 Demo 2: Enterprise Webhook HITL - Advanced Human-in-the-Loop")
-    print("=" * 60)
+class Demo2WebUI:
+    """Web UI for Demo 2 HITL workflow."""
     
-    # Load configuration
-    agents = load_agents()
-    tasks = load_tasks(agents)
+    def __init__(self, crew_client):
+        self.crew_client = crew_client
+        self.current_execution = None
+        self.webhook_port = os.getenv('WEBHOOK_PORT', '5000')
+        self.webhook_secret = os.getenv('WEBHOOK_SECRET_TKN', 'demo-secret-token')
     
-    # Get the researcher agent and research task
-    researcher = agents['content_researcher']
-    research_task = tasks['research_task']
-    
-    print(f"👤 Agent: {researcher.role}")
-    print(f"📋 Task: {research_task.description[:100]}...")
-    print(f"🎯 Expected Output: {research_task.expected_output}")
-    print(f"🤖 Human Input Enabled: {research_task.human_input}")
-    print()
-    
-    # Create crew
-    crew = Crew(
-        agents=[researcher],
-        tasks=[research_task],
-        verbose=True
-    )
-    
-    print("💡 This demo shows enterprise webhook HITL capabilities")
-    print("   Requires CrewAI AMP (enterprise) account")
-    print("   Features: Real webhooks, UI integration, pause/resume")
-    print()
-    
-    try:
-        # Run crew execution
-        print("🚀 Kicking off crew execution...")
-        print("💡 Note: In enterprise CrewAI, this would pause for human input")
-        print("   when it encounters a task with human_input=True")
+    def start_content_pipeline(self, topic):
+        """Start the content pipeline with given topic."""
+        print(f"🚀 Starting content pipeline for topic: '{topic}'")
+        print("=" * 60)
+        
+        # Start execution
+        result = self.crew_client.start_execution({"topic": topic})
+        if not result:
+            print("❌ Failed to start execution")
+            return False
+        
+        self.current_execution = result
+        execution_id = result.get('execution_id')
+        
+        print(f"✅ Execution started: {execution_id}")
+        print(f"🌐 Monitor at: http://localhost:{self.webhook_port}/demo2")
+        print(f"📊 Execution URL: {self.crew_client.crew_url}/executions/{execution_id}")
         print()
         
-        # Try enterprise webhook HITL first, fallback to simulation
-        try:
-            # Enterprise webhook HITL (requires CrewAI AMP)
-            result = crew.kickoff(
-                inputs={"topic": "AI Business Automation"},
-                humanInputWebhook={
-                    "url": "http://localhost:5000/hitl",
-                    "authentication": {
-                        "strategy": "bearer",
-                        "token": "demo-secret-token"
-                    }
-                }
-            )
-            print("✅ Enterprise webhook HITL configured successfully!")
-            print("🎯 CrewAI will pause execution and send webhook notifications")
-            
-        except TypeError as e:
-            if "unexpected keyword argument" in str(e):
-                print("⚠️ Enterprise webhook HITL not available")
-                print("💡 Falling back to simulation mode")
-                print("🔄 Run with CrewAI AMP for real webhook HITL")
-                
-                # Fallback: Run crew normally and simulate webhook
-                result = crew.kickoff(
-                    inputs={"topic": "AI Business Automation"}
-                )
-            else:
-                raise e
-        
-        print("✅ Crew execution completed!")
-        print(f"📊 Result type: {type(result)}")
-        
-        if hasattr(result, 'raw'):
-            print(f"📝 Raw output length: {len(str(result.raw))}")
-        
-        # Simulate HITL pause and webhook notification
-        print("\n🤖 Simulating HITL pause and webhook notification...")
-        simulate_hitl_pause_and_webhook(result)
-        
-        print("\n🎯 Demo 2 completed successfully!")
-        print("💡 This demonstrates enterprise webhook HITL capabilities")
-        print("   With CrewAI AMP: Real pause/resume via webhooks")
-        print("   Without AMP: Educational simulation of the workflow")
-        
-        return result
+        # Monitor execution
+        return self.monitor_execution(execution_id)
     
-    except Exception as e:
-        print(f"❌ Error during crew execution: {str(e)}")
-        raise
+    def monitor_execution(self, execution_id):
+        """Monitor execution and handle HITL pauses."""
+        print("🔄 Monitoring execution...")
+        
+        while True:
+            status = self.crew_client.get_execution_status(execution_id)
+            if not status:
+                print("❌ Failed to get execution status")
+                return False
+            
+            execution_status = status.get('status', 'unknown')
+            print(f"📊 Status: {execution_status}")
+            
+            if execution_status == 'completed':
+                print("✅ Execution completed successfully!")
+                print(f"📄 Final output: {status.get('output', 'No output available')}")
+                return True
+            
+            elif execution_status == 'failed':
+                print("❌ Execution failed")
+                print(f"💥 Error: {status.get('error', 'Unknown error')}")
+                return False
+            
+            elif execution_status == 'pending_human_input':
+                print("⏸️ Execution paused for human input")
+                return self.handle_human_input(execution_id, status)
+            
+            elif execution_status == 'running':
+                print("🔄 Execution in progress...")
+                time.sleep(5)  # Wait 5 seconds before checking again
+            
+            else:
+                print(f"❓ Unknown status: {execution_status}")
+                time.sleep(5)
+    
+    def handle_human_input(self, execution_id, status):
+        """Handle human input at HITL pause points."""
+        pause_point = status.get('pause_point', 'unknown')
+        output_data = status.get('output', {})
+        
+        print(f"👤 Human input required at: {pause_point}")
+        print("=" * 40)
+        
+        if pause_point == 'Human Research Review Gate':
+            return self.handle_research_review(execution_id, output_data)
+        elif pause_point == 'Human Final Approval Gate':
+            return self.handle_final_approval(execution_id, output_data)
+        else:
+            return self.handle_generic_review(execution_id, output_data, pause_point)
+    
+    def handle_research_review(self, execution_id, research_data):
+        """Handle research review checkpoint."""
+        print("📊 RESEARCH REVIEW CHECKPOINT")
+        print("=" * 40)
+        
+        # Display research findings
+        print("🔍 Research Findings:")
+        print("-" * 20)
+        if isinstance(research_data, dict):
+            for key, value in research_data.items():
+                print(f"{key}: {value}")
+        else:
+            print(research_data)
+        
+        print()
+        print("Options:")
+        print("1. ✅ Approve - Continue to blog post creation")
+        print("2. 🔄 Revise - Request research revision")
+        print("3. ❌ Reject - Stop execution")
+        
+        while True:
+            choice = input("\nEnter your choice (1/2/3): ").strip()
+            
+            if choice == '1':
+                print("✅ Research approved! Continuing to blog post creation...")
+                result = self.crew_client.resume_execution(execution_id)
+                return self.monitor_execution(execution_id)
+            
+            elif choice == '2':
+                feedback = input("📝 Enter revision feedback: ").strip()
+                if feedback:
+                    print("🔄 Requesting research revision...")
+                    result = self.crew_client.resume_execution(execution_id, feedback)
+                    return self.monitor_execution(execution_id)
+                else:
+                    print("⚠️ Please provide feedback for revision")
+            
+            elif choice == '3':
+                print("❌ Execution rejected by user")
+                return False
+            
+            else:
+                print("❌ Invalid choice. Please enter 1, 2, or 3")
+    
+    def handle_final_approval(self, execution_id, content_data):
+        """Handle final approval checkpoint."""
+        print("📝 FINAL APPROVAL CHECKPOINT")
+        print("=" * 40)
+        
+        # Display final content
+        print("📄 Final Blog Post:")
+        print("-" * 20)
+        if isinstance(content_data, dict):
+            for key, value in content_data.items():
+                print(f"{key}: {value}")
+        else:
+            print(content_data)
+        
+        print()
+        print("Options:")
+        print("1. ✅ Approve - Publish content")
+        print("2. 🔄 Revise - Request final revision")
+        print("3. ❌ Reject - Discard content")
+        
+        while True:
+            choice = input("\nEnter your choice (1/2/3): ").strip()
+            
+            if choice == '1':
+                print("✅ Content approved! Publishing...")
+                result = self.crew_client.resume_execution(execution_id)
+                return self.monitor_execution(execution_id)
+            
+            elif choice == '2':
+                feedback = input("📝 Enter revision feedback: ").strip()
+                if feedback:
+                    print("🔄 Requesting final revision...")
+                    result = self.crew_client.resume_execution(execution_id, feedback)
+                    return self.monitor_execution(execution_id)
+                else:
+                    print("⚠️ Please provide feedback for revision")
+            
+            elif choice == '3':
+                print("❌ Content rejected by user")
+                return False
+            
+            else:
+                print("❌ Invalid choice. Please enter 1, 2, or 3")
+    
+    def handle_generic_review(self, execution_id, data, pause_point):
+        """Handle generic review checkpoint."""
+        print(f"👤 HUMAN REVIEW CHECKPOINT: {pause_point}")
+        print("=" * 40)
+        
+        print("📄 Output Data:")
+        print("-" * 20)
+        if isinstance(data, dict):
+            for key, value in data.items():
+                print(f"{key}: {value}")
+        else:
+            print(data)
+        
+        print()
+        print("Options:")
+        print("1. ✅ Approve - Continue execution")
+        print("2. 🔄 Revise - Request revision")
+        print("3. ❌ Reject - Stop execution")
+        
+        while True:
+            choice = input("\nEnter your choice (1/2/3): ").strip()
+            
+            if choice == '1':
+                print("✅ Approved! Continuing execution...")
+                result = self.crew_client.resume_execution(execution_id)
+                return self.monitor_execution(execution_id)
+            
+            elif choice == '2':
+                feedback = input("📝 Enter revision feedback: ").strip()
+                if feedback:
+                    print("🔄 Requesting revision...")
+                    result = self.crew_client.resume_execution(execution_id, feedback)
+                    return self.monitor_execution(execution_id)
+                else:
+                    print("⚠️ Please provide feedback for revision")
+            
+            elif choice == '3':
+                print("❌ Execution rejected by user")
+                return False
+            
+            else:
+                print("❌ Invalid choice. Please enter 1, 2, or 3")
 
+def run_enterprise_webhook_hitl_demo():
+    """Run Demo 2 with enterprise webhook HITL support."""
+    print("🎯 Demo 2: Enterprise Webhook HITL - Full Content Pipeline")
+    print("This demo showcases web UI integration with deployed CrewAI AMP crew")
+    print()
+    
+    # Get crew configuration from environment
+    crew_url = os.getenv('CREWAI_CREW_URL')
+    crew_token = os.getenv('CREWAI_CREW_TOKEN')
+    
+    if not crew_url or not crew_token:
+        print("❌ Missing crew configuration!")
+        print("Please set the following environment variables:")
+        print("  CREWAI_CREW_URL=https://your-deployed-crew.crewai.com")
+        print("  CREWAI_CREW_TOKEN=your-bearer-token")
+        print()
+        print("💡 Get these values from your CrewAI AMP dashboard:")
+        print("  1. Go to your deployed crew")
+        print("  2. Copy the API URL from the Status tab")
+        print("  3. Copy the Bearer Token from the Status tab")
+        return False
+    
+    # Create crew client
+    crew_client = CrewAIAMPClient(crew_url, crew_token)
+    
+    # Create web UI
+    web_ui = Demo2WebUI(crew_client)
+    
+    # Get topic from user
+    print("📝 Enter a topic for the content pipeline:")
+    topic = input("Topic: ").strip()
+    
+    if not topic:
+        topic = "AI Business Automation"
+        print(f"Using default topic: {topic}")
+    
+    print()
+    
+    # Start the pipeline
+    success = web_ui.start_content_pipeline(topic)
+    
+    if success:
+        print("\n🎉 Demo 2 completed successfully!")
+        print("💡 This demonstrates enterprise webhook HITL with AMP integration")
+    else:
+        print("\n❌ Demo 2 failed or was cancelled")
+    
+    return success
 
 def main():
     """Main function for Demo 2."""
-    print("🎯 Demo 2: Enterprise Webhook HITL")
-    print("This demo shows advanced Human-in-the-Loop with webhook integration")
-    print("Requires CrewAI AMP (enterprise) for full functionality")
+    print("🎯 Demo 2: Enterprise Webhook HITL - Full Content Pipeline")
+    print("This demo shows web UI integration with deployed CrewAI AMP crew")
+    print("featuring multi-agent content pipeline with human gate approvals")
     print()
     
+    # Check if crew configuration is available
+    crew_url = os.getenv('CREWAI_CREW_URL')
+    crew_token = os.getenv('CREWAI_CREW_TOKEN')
+    
+    if not crew_url or not crew_token:
+        print("⚠️ Missing crew configuration!")
+        print("Please set the following environment variables:")
+        print("  CREWAI_CREW_URL=https://your-deployed-crew.crewai.com")
+        print("  CREWAI_CREW_TOKEN=your-bearer-token-from-amp-dashboard")
+        print()
+        print("💡 Get these values from your CrewAI AMP dashboard:")
+        print("  1. Go to your deployed crew")
+        print("  2. Copy the API URL from the Status tab")
+        print("  3. Copy the Bearer Token from the Status tab")
+        print()
+        print("🌐 Demo UI will still be available at: http://localhost:5000/demo2")
+        print("   (But crew execution will be simulated)")
+    else:
+        print("✅ Crew configuration found!")
+        print(f"🔗 Crew URL: {crew_url}")
+        print(f"🔑 Token: {crew_token[:10]}...")
+    
+    print()
+    print("🌐 Launching Demo 2 Web UI...")
+    print("📱 Open your browser and go to: http://localhost:5000/demo2")
+    print()
+    print("🎯 Demo 2 Web UI Features:")
+    print("  • Interactive topic input")
+    print("  • Real-time execution monitoring")
+    print("  • Human review gates with forms")
+    print("  • Content download and publishing options")
+    print()
+    print("Press Ctrl+C to stop the demo")
+    
     try:
-        result = run_enterprise_webhook_hitl_demo()
-        print("\n🎉 Demo 2 completed successfully!")
-        print("Check the webhook server logs for HITL notifications")
-        
+        # Keep the script running to maintain the webhook server
+        import time
+        while True:
+            time.sleep(1)
     except KeyboardInterrupt:
-        print("\n⏹️ Demo interrupted by user")
+        print("\n⏹️ Demo stopped by user")
     except Exception as e:
-        print(f"\n❌ Demo failed: {str(e)}")
+        print(f"\n❌ Demo error: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":
     main()
-

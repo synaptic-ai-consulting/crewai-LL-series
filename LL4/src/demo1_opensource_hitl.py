@@ -1,6 +1,6 @@
 """
-Demo 1: Open Source HITL - Basic Human-in-the-Loop
-Simple demonstration of human_input=True in open source CrewAI
+Demo 1: Open Source HITL - Iterative Refinement Pattern
+Demonstrates iterative refinement with human feedback in open source CrewAI
 """
 
 import os
@@ -35,11 +35,18 @@ def load_agents():
     
     return agents
 
-def create_simple_hitl_task(agent, topic):
-    """Create a simple task with human input enabled."""
+def create_iterative_refinement_task(agent, topic, iteration=1, previous_feedback=""):
+    """Create a task for iterative refinement with human feedback."""
+    if iteration == 1:
+        description = f"Write a comprehensive summary of the latest {topic} trends. Focus on the most impactful developments and their business implications."
+        expected_output = f"A detailed summary of current {topic} trends with business insights"
+    else:
+        description = f"Refine and improve the {topic} summary based on the previous feedback. Incorporate the suggestions: '{previous_feedback}'. Make the content more engaging and comprehensive."
+        expected_output = f"An improved and refined summary of {topic} trends incorporating human feedback"
+    
     return Task(
-        description=f"Write a brief summary of the latest {topic} trends in 2-3 paragraphs. Focus on the most impactful developments.",
-        expected_output=f"A concise 2-3 paragraph summary of current {topic} trends with key insights",
+        description=description,
+        expected_output=expected_output,
         agent=agent,
         human_input=True  # This enables HITL in open source CrewAI
     )
@@ -59,11 +66,11 @@ def get_user_topic():
             print("❌ Please enter a valid topic")
 
 def run_opensource_hitl_demo():
-    """Run Demo 1: Open Source HITL."""
-    print("🚀 Demo 1: Open Source HITL - Basic Human-in-the-Loop")
+    """Run Demo 1: Open Source HITL with Iterative Refinement."""
+    print("🚀 Demo 1: Open Source HITL - Iterative Refinement Pattern")
     print("=" * 60)
-    print("This demo shows how human_input=True works in open source CrewAI")
-    print("The execution will pause and wait for human feedback in the console")
+    print("This demo shows iterative refinement with human feedback")
+    print("in open source CrewAI using console-based HITL")
     print()
     
     # Get topic from user
@@ -74,71 +81,115 @@ def run_opensource_hitl_demo():
     agents = load_agents()
     researcher = agents['content_researcher']
     
-    # Create a simple HITL task with user's topic
-    hitl_task = create_simple_hitl_task(researcher, topic)
-    
     print(f"👤 Agent: {researcher.role}")
-    print(f"📋 Task: {hitl_task.description}")
-    print(f"🎯 Expected Output: {hitl_task.expected_output}")
-    print(f"🤖 Human Input Enabled: {hitl_task.human_input}")
     print()
     
-    # Create crew
-    crew = Crew(
-        agents=[researcher],
-        tasks=[hitl_task],
-        verbose=True
-    )
-    
-    print("💡 Key Points About Open Source HITL:")
-    print("   • human_input=True pauses execution for console input")
-    print("   • No webhook support - only interactive/CLI")
-    print("   • Human provides feedback via console prompt")
-    print("   • Execution resumes after human input")
+    print("💡 Iterative Refinement Pattern:")
+    print("   • Multiple iterations with human feedback")
+    print("   • Each iteration improves based on previous feedback")
+    print("   • Human provides specific improvement suggestions")
+    print("   • Process continues until satisfied with output")
     print()
     
-    try:
-        print("🚀 Starting crew execution...")
-        print("⏸️  Execution will pause when human input is required")
+    # Iterative refinement loop
+    max_iterations = 3
+    feedback_history = []
+    
+    for iteration in range(1, max_iterations + 1):
+        print(f"🔄 === ITERATION {iteration} ===")
+        
+        # Create task for this iteration
+        previous_feedback = feedback_history[-1] if feedback_history else ""
+        hitl_task = create_iterative_refinement_task(researcher, topic, iteration, previous_feedback)
+        
+        print(f"📋 Task: {hitl_task.description}")
+        print(f"🎯 Expected Output: {hitl_task.expected_output}")
         print()
         
-        # This will actually pause for human input in open source CrewAI
-        result = crew.kickoff(
-            inputs={"topic": topic}
+        # Create crew for this iteration
+        crew = Crew(
+            agents=[researcher],
+            tasks=[hitl_task],
+            verbose=True
         )
         
-        print("\n✅ Crew execution completed!")
-        print(f"📊 Result type: {type(result)}")
-        
-        if hasattr(result, 'raw'):
-            print(f"📝 Raw output length: {len(str(result.raw))}")
-            print("\n📋 Final Output:")
-            print("-" * 40)
-            print(str(result.raw))
-            print("-" * 40)
-        
-        return result
+        try:
+            print(f"🚀 Starting iteration {iteration}...")
+            print("⏸️  Execution will pause for human feedback")
+            print()
+            
+            # This will pause for human input in open source CrewAI
+            result = crew.kickoff(
+                inputs={"topic": topic, "iteration": iteration}
+            )
+            
+            print(f"\n✅ Iteration {iteration} completed!")
+            
+            if hasattr(result, 'raw'):
+                output = str(result.raw)
+                print(f"📝 Output length: {len(output)} characters")
+                print("\n📋 Current Output:")
+                print("-" * 40)
+                print(output[:500] + "..." if len(output) > 500 else output)
+                print("-" * 40)
+                
+                # Ask for feedback
+                print(f"\n🤔 Human Review for Iteration {iteration}:")
+                print("Please provide feedback to improve the content:")
+                print("   • What should be added or removed?")
+                print("   • How can it be more engaging?")
+                print("   • Any specific improvements needed?")
+                print()
+                
+                feedback = input("💬 Your feedback (or 'done' to finish): ").strip()
+                
+                if feedback.lower() == 'done':
+                    print("✅ Content approved! Iterative refinement complete.")
+                    break
+                elif feedback:
+                    feedback_history.append(feedback)
+                    print(f"✅ Feedback recorded: {feedback}")
+                    print("🔄 Will incorporate this feedback in next iteration")
+                else:
+                    print("⚠️ No feedback provided, continuing to next iteration")
+                
+                print()
+                
+                # Check if this is the last iteration
+                if iteration == max_iterations:
+                    print("🏁 Maximum iterations reached")
+                    print("💡 This demonstrates the iterative refinement pattern")
+                    break
+            else:
+                print("⚠️ No output received from crew")
+                break
+                
+        except KeyboardInterrupt:
+            print("\n⏹️ Demo interrupted by user")
+            return None
+        except Exception as e:
+            print(f"❌ Error during iteration {iteration}: {str(e)}")
+            raise
     
-    except KeyboardInterrupt:
-        print("\n⏹️ Demo interrupted by user")
-        return None
-    except Exception as e:
-        print(f"❌ Error during crew execution: {str(e)}")
-        raise
+    print("\n🎯 Iterative Refinement Demo completed!")
+    print(f"📊 Total iterations: {len(feedback_history) + 1}")
+    print(f"💬 Feedback cycles: {len(feedback_history)}")
+    
+    return result
 
 def main():
     """Main function for Demo 1."""
-    print("🎯 Demo 1: Open Source HITL")
-    print("This demo shows basic human_input=True functionality")
+    print("🎯 Demo 1: Open Source HITL - Iterative Refinement")
+    print("This demo shows iterative refinement with human feedback")
     print("in open source CrewAI (console-based HITL)")
-    print("You'll be prompted to enter a topic for research")
+    print("You'll be prompted to enter a topic and provide feedback")
     print()
     
     try:
         result = run_opensource_hitl_demo()
         if result:
             print("\n🎯 Demo 1 completed successfully!")
-            print("💡 This demonstrates basic HITL in open source CrewAI")
+            print("💡 This demonstrates iterative refinement in open source CrewAI")
             print("   Next: Demo 2 will show enterprise webhook HITL")
         
     except KeyboardInterrupt:

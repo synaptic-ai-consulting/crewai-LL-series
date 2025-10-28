@@ -1,0 +1,53 @@
+---
+research_topic_analysis:
+  description: "**[HUMAN INPUT REQUIRED]** Conduct comprehensive research on {topic}
+    for TechCorp's content marketing strategy. This task will PAUSE after completion
+    for human review and approval before proceeding. Gather information from multiple
+    credible sources including industry reports, expert opinions, trending discussions,
+    and competitor analysis. Focus on identifying key insights, statistics, pain points,
+    and opportunities that would be valuable for our target audience. Present findings
+    in a structured format with source citations for human review and approval."
+  expected_output: "**PAUSES FOR HUMAN APPROVAL** - A comprehensive research report
+    structured for webhook integration: **RESEARCH FINDINGS** section with executive
+    summary, market trends, expert insights, and competitor analysis, **SOURCE VALIDATION**
+    with credibility scores and citations, **RECOMMENDED CONTENT ANGLES** (3-5 options
+    with rationale), **HUMAN REVIEW REQUIRED** section highlighting key decisions
+    needed, **APPROVAL GATEWAY** - Task pauses here waiting for human feedback via
+    webhook payload: {approved: boolean, feedback: string, selected_angle: string,
+    additional_requirements: string}. Workflow resumes only after human approval received."
+  agent: content_researcher
+  human_input: true
+blog_post_creation:
+  description: "**PHASE 2 TASK**: Create compelling blog post about {topic} for TechCorp's
+    marketing blog using approved research insights. This task expects human-approved
+    research direction as input. Structure content with proper SEO optimization, engaging
+    headlines, and clear calls-to-action. Include TechCorp-specific insights and thought
+    leadership elements that align with approved research direction."
+  expected_output: 'A complete blog post in markdown format with: compelling title
+    and meta description, engaging introduction that hooks the reader, well-structured
+    body content with subheadings, relevant statistics and insights from research,
+    practical takeaways or actionable advice, strong conclusion with call-to-action,
+    and SEO-optimized formatting. Content should be approximately 1200-1800 words
+    and ready for editorial review.'
+  agent: blog_writer
+  context:
+  - research_topic_analysis
+editorial_review_and_refinement:
+  description: "**[HUMAN INPUT REQUIRED]** Review and refine the blog post created
+    in the Blog Post Creation task to ensure it meets TechCorp's editorial standards
+    and quality guidelines. This task will PAUSE after completion for final human
+    approval before publication preparation. Focus on improving clarity, flow, accuracy,
+    and overall impact. Check for consistency with brand voice, optimize for readability,
+    verify factual accuracy, enhance SEO elements, and ensure proper formatting. Prepare
+    the content with specific recommendations for the final human review stage."
+  expected_output: "**PAUSES FOR FINAL APPROVAL** - Publication-ready blog post structured
+    for final human approval: **POLISHED CONTENT** with enhanced title/meta description,
+    refined structure and flow, **EDITORIAL CONFIDENCE SCORE** (1-10), **QUALITY CHECKLIST**
+    (brand voice, SEO, accuracy, formatting validation), **APPROVAL GATEWAY** - Task
+    pauses here waiting for final human approval via webhook payload: {final_approved:
+    boolean, revision_notes: string, publish_immediately: boolean, scheduled_date:
+    string}. Publication preparation proceeds only after final approval received."
+  agent: editor
+  human_input: true
+  context:
+  - blog_post_creation

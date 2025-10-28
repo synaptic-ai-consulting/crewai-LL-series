@@ -50,7 +50,9 @@ def demo1_ui():
 @app.route('/demo2')
 def demo2_ui():
     """Demo 2: Enterprise Webhook HITL UI."""
-    return render_template('demo1_ui.html', demo_title="Enterprise Webhook HITL", demo_description="Advanced webhook-based HITL with UI integration")
+    return render_template('demo2_ui.html', 
+                         demo_title="Enterprise Webhook HITL", 
+                         demo_description="Multi-agent content pipeline with human gate approvals")
 
 @app.route('/demo3')
 def demo3_ui():
@@ -213,6 +215,193 @@ def unauthorized(error):
 @app.errorhandler(500)
 def internal_error(error):
     return jsonify({"error": "Internal server error"}), 500
+
+@app.route('/api/demo2/start', methods=['POST'])
+def demo2_start():
+    """Start Demo 2 execution via API."""
+    try:
+        data = request.get_json()
+        topic = data.get('topic', 'AI Business Automation')
+        
+        print(f"🚀 Demo 2 API: Starting execution for topic '{topic}'")
+        
+        # Check if we have real crew configuration
+        crew_url = os.getenv('CREWAI_CREW_URL')
+        crew_token = os.getenv('CREWAI_CREW_TOKEN')
+        
+        if crew_url and crew_token:
+            # Real CrewAI AMP integration
+            import requests
+            
+            headers = {
+                'Authorization': f'Bearer {crew_token}',
+                'Content-Type': 'application/json'
+            }
+            
+            payload = {"inputs": {"topic": topic}}
+            
+            try:
+                response = requests.post(f"{crew_url}/api/crews/run", 
+                                       headers=headers, json=payload)
+                response.raise_for_status()
+                result = response.json()
+                
+                execution_id = result.get('execution_id', f"amp_{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+                
+                crew_executions[execution_id] = {
+                    'execution_id': execution_id,
+                    'topic': topic,
+                    'status': 'running',
+                    'timestamp': datetime.now().isoformat(),
+                    'crew_url': crew_url,
+                    'crew_token': crew_token,
+                    'real_execution': True
+                }
+                
+                print(f"✅ Real AMP execution started: {execution_id}")
+                
+            except requests.exceptions.RequestException as e:
+                print(f"❌ AMP API error: {e}")
+                # Fall back to simulation
+                execution_id = f"sim_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                crew_executions[execution_id] = {
+                    'execution_id': execution_id,
+                    'topic': topic,
+                    'status': 'running',
+                    'timestamp': datetime.now().isoformat(),
+                    'real_execution': False,
+                    'error': str(e)
+                }
+        else:
+            # Simulation mode
+            execution_id = f"sim_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            
+            crew_executions[execution_id] = {
+                'execution_id': execution_id,
+                'topic': topic,
+                'status': 'running',
+                'timestamp': datetime.now().isoformat(),
+                'real_execution': False
+            }
+            
+            print(f"🎭 Simulation mode execution started: {execution_id}")
+        
+        return jsonify({
+            'status': 'success',
+            'execution_id': execution_id,
+            'message': f'Demo 2 execution started for topic: {topic}',
+            'monitor_url': f'/demo2/monitor/{execution_id}'
+        })
+        
+    except Exception as e:
+        print(f"❌ Error starting Demo 2 execution: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/api/demo2/status/<execution_id>', methods=['GET'])
+def demo2_status(execution_id):
+    """Get Demo 2 execution status."""
+    if execution_id not in crew_executions:
+        return jsonify({'error': 'Execution not found'}), 404
+    
+    execution = crew_executions[execution_id]
+    
+    # If it's a real AMP execution, check the actual status
+    if execution.get('real_execution') and execution.get('crew_url') and execution.get('crew_token'):
+        try:
+            import requests
+            
+            headers = {
+                'Authorization': f'Bearer {execution["crew_token"]}',
+                'Content-Type': 'application/json'
+            }
+            
+            response = requests.get(f"{execution['crew_url']}/api/crews/status/{execution_id}", 
+                                  headers=headers)
+            response.raise_for_status()
+            amp_status = response.json()
+            
+            # Update our local status
+            execution['status'] = amp_status.get('status', 'unknown')
+            execution['output'] = amp_status.get('output')
+            execution['pause_point'] = amp_status.get('pause_point')
+            execution['last_check'] = datetime.now().isoformat()
+            
+            return jsonify(execution)
+            
+        except requests.exceptions.RequestException as e:
+            print(f"❌ AMP status check error: {e}")
+            execution['status'] = 'error'
+            execution['error'] = str(e)
+    
+    # For simulation mode or if AMP check failed, return local status
+    return jsonify(execution)
+
+@app.route('/api/demo2/resume', methods=['POST'])
+def demo2_resume():
+    """Resume Demo 2 execution with feedback."""
+    try:
+        data = request.get_json()
+        execution_id = data.get('execution_id')
+        feedback = data.get('feedback')
+        
+        if execution_id not in crew_executions:
+            return jsonify({'error': 'Execution not found'}), 404
+        
+        execution = crew_executions[execution_id]
+        
+        print(f"🔄 Demo 2 API: Resuming execution {execution_id}")
+        if feedback:
+            print(f"📝 Feedback: {feedback}")
+        
+        # If it's a real AMP execution, resume via AMP API
+        if execution.get('real_execution') and execution.get('crew_url') and execution.get('crew_token'):
+            try:
+                import requests
+                
+                headers = {
+                    'Authorization': f'Bearer {execution["crew_token"]}',
+                    'Content-Type': 'application/json'
+                }
+                
+                payload = {"feedback": feedback} if feedback else {}
+                
+                response = requests.post(f"{execution['crew_url']}/api/crews/resume/{execution_id}", 
+                                       headers=headers, json=payload)
+                response.raise_for_status()
+                
+                print(f"✅ Real AMP execution resumed: {execution_id}")
+                
+            except requests.exceptions.RequestException as e:
+                print(f"❌ AMP resume error: {e}")
+                execution['status'] = 'error'
+                execution['error'] = str(e)
+                return jsonify({'error': f'Failed to resume AMP execution: {e}'}), 500
+        
+        # Update execution status
+        execution['status'] = 'running'
+        execution['last_feedback'] = feedback
+        execution['last_action'] = datetime.now().isoformat()
+        
+        return jsonify({
+            'status': 'success',
+            'message': 'Execution resumed successfully',
+            'execution_id': execution_id
+        })
+        
+    except Exception as e:
+        print(f"❌ Error resuming Demo 2 execution: {e}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/demo2/monitor/<execution_id>')
+def demo2_monitor(execution_id):
+    """Demo 2 execution monitoring page."""
+    if execution_id not in crew_executions:
+        return "Execution not found", 404
+    
+    execution = crew_executions[execution_id]
+    return render_template('demo2_monitor.html', 
+                         execution_id=execution_id,
+                         execution=execution)
 
 if __name__ == '__main__':
     port = int(os.getenv('WEBHOOK_PORT', 5000))

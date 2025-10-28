@@ -1,0 +1,19 @@
+tasks:
+  research_task:
+    description: "Research AI automation trends and create comprehensive findings. Focus on breakthrough technologies that could impact business automation."
+    expected_output: "Detailed research report with key insights and data points"
+    agent: content_researcher
+    human_input: true
+    
+  writing_task:
+    description: "Create a compelling blog post based on the approved research. Incorporate any feedback from the research review stage."
+    expected_output: "Well-structured blog post with engaging content"
+    agent: blog_writer
+    human_input: true
+    
+  editing_task:
+    description: "Edit and polish the approved blog post for publication. Incorporate feedback from both previous review stages."
+    expected_output: "Publication-ready blog post with optimized content"
+    agent: editor
+    human_input: false
+

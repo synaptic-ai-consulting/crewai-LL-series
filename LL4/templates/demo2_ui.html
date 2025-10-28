@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ demo_title }} - CrewAI HITL Demo</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        .content {
+            padding: 40px;
+        }
+        .step {
+            margin-bottom: 40px;
+            padding: 30px;
+            border: 2px solid #f0f0f0;
+            border-radius: 10px;
+            background: #fafafa;
+        }
+        .step.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        .step.completed {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+        .step-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        .step.completed .step-title {
+            color: #28a745;
+        }
+        .step.active .step-title {
+            color: #667eea;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545 0%, #e83e8c 100%);
+        }
+        .output-display {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status-indicator {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .status-running {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-completed {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .hidden {
+            display: none;
+        }
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .download-section {
+            text-align: center;
+            padding: 30px;
+            background: #f8f9ff;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ demo_title }}</h1>
+            <p>{{ demo_description }}</p>
+        </div>
+        
+        <div class="content">
+            <!-- Step 1: Topic Input -->
+            <div class="step active" id="step1">
+                <div class="step-title">
+                    Step 1: Content Topic Input
+                    <span class="status-indicator status-pending" id="step1-status">Ready</span>
+                </div>
+                <div class="form-group">
+                    <label for="topic">Enter a topic for your content pipeline:</label>
+                    <input type="text" id="topic" placeholder="e.g., AI in Customer Service, Digital Transformation, etc." value="AI Business Automation">
+                </div>
+                <button class="btn" id="start-execution" onclick="startExecution()">
+                    🚀 Start Content Pipeline
+                </button>
+            </div>
+
+            <!-- Step 2: Research Review -->
+            <div class="step hidden" id="step2">
+                <div class="step-title">
+                    Step 2: Research Review Gate
+                    <span class="status-indicator status-pending" id="step2-status">Waiting</span>
+                </div>
+                <div id="research-output" class="output-display hidden">
+                    <h4>🔍 Research Findings:</h4>
+                    <div id="research-content"></div>
+                </div>
+                <div class="form-group">
+                    <label for="research-feedback">Your feedback (optional):</label>
+                    <textarea id="research-feedback" rows="4" placeholder="Provide specific feedback for research revision, or leave empty to approve..."></textarea>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-success" onclick="approveResearch()">✅ Approve Research</button>
+                    <button class="btn btn-warning" onclick="reviseResearch()">🔄 Request Revision</button>
+                    <button class="btn btn-danger" onclick="rejectExecution()">❌ Reject</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Final Approval -->
+            <div class="step hidden" id="step3">
+                <div class="step-title">
+                    Step 3: Final Content Approval
+                    <span class="status-indicator status-pending" id="step3-status">Waiting</span>
+                </div>
+                <div id="final-output" class="output-display hidden">
+                    <h4>📄 Final Blog Post:</h4>
+                    <div id="final-content"></div>
+                </div>
+                <div class="form-group">
+                    <label for="final-feedback">Your feedback (optional):</label>
+                    <textarea id="final-feedback" rows="4" placeholder="Provide specific feedback for final revision, or leave empty to approve..."></textarea>
+                </div>
+                <div class="actions">
+                    <button class="btn btn-success" onclick="approveFinal()">✅ Approve & Publish</button>
+                    <button class="btn btn-warning" onclick="reviseFinal()">🔄 Request Final Revision</button>
+                    <button class="btn btn-danger" onclick="rejectExecution()">❌ Reject</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Completion -->
+            <div class="step hidden" id="step4">
+                <div class="step-title">
+                    Step 4: Content Published
+                    <span class="status-indicator status-completed" id="step4-status">Completed</span>
+                </div>
+                <div id="completion-output" class="output-display">
+                    <h4>🎉 Content Successfully Created!</h4>
+                    <div id="completion-content"></div>
+                </div>
+                <div class="download-section">
+                    <h4>📥 Download & Share Options</h4>
+                    <div class="actions">
+                        <button class="btn" onclick="downloadContent()">📄 Download as Markdown</button>
+                        <button class="btn" onclick="downloadContent('html')">🌐 Download as HTML</button>
+                        <button class="btn btn-success" onclick="postToBlog()">📝 Post to Blog</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentExecutionId = null;
+        let executionStatus = null;
+
+        async function startExecution() {
+            const topic = document.getElementById('topic').value.trim();
+            if (!topic) {
+                alert('Please enter a topic');
+                return;
+            }
+
+            const startBtn = document.getElementById('start-execution');
+            startBtn.disabled = true;
+            startBtn.innerHTML = '<span class="loading"></span>Starting...';
+
+            try {
+                const response = await fetch('/api/demo2/start', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ topic: topic })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    currentExecutionId = result.execution_id;
+                    showStep('step2');
+                    updateStepStatus('step1', 'completed');
+                    updateStepStatus('step2', 'running');
+                    startMonitoring();
+                } else {
+                    throw new Error(result.error || 'Failed to start execution');
+                }
+            } catch (error) {
+                alert('Error starting execution: ' + error.message);
+                startBtn.disabled = false;
+                startBtn.innerHTML = '🚀 Start Content Pipeline';
+            }
+        }
+
+        async function startMonitoring() {
+            if (!currentExecutionId) return;
+
+            const interval = setInterval(async () => {
+                try {
+                    const response = await fetch(`/api/demo2/status/${currentExecutionId}`);
+                    const status = await response.json();
+                    
+                    if (status.status === 'pending_human_input') {
+                        clearInterval(interval);
+                        handleHumanInput(status);
+                    } else if (status.status === 'completed') {
+                        clearInterval(interval);
+                        handleCompletion(status);
+                    } else if (status.status === 'failed') {
+                        clearInterval(interval);
+                        handleError(status);
+                    }
+                } catch (error) {
+                    console.error('Monitoring error:', error);
+                }
+            }, 2000);
+        }
+
+        function handleHumanInput(status) {
+            const pausePoint = status.pause_point || 'unknown';
+            
+            if (pausePoint === 'Human Research Review Gate') {
+                updateStepStatus('step2', 'pending');
+                document.getElementById('research-content').innerHTML = formatOutput(status.output);
+                document.getElementById('research-output').classList.remove('hidden');
+            } else if (pausePoint === 'Human Final Approval Gate') {
+                showStep('step3');
+                updateStepStatus('step2', 'completed');
+                updateStepStatus('step3', 'pending');
+                document.getElementById('final-content').innerHTML = formatOutput(status.output);
+                document.getElementById('final-output').classList.remove('hidden');
+            }
+        }
+
+        function handleCompletion(status) {
+            showStep('step4');
+            updateStepStatus('step3', 'completed');
+            document.getElementById('completion-content').innerHTML = formatOutput(status.output);
+        }
+
+        function handleError(status) {
+            alert('Execution failed: ' + (status.error || 'Unknown error'));
+            updateStepStatus('step2', 'error');
+        }
+
+        async function approveResearch() {
+            await resumeExecution();
+        }
+
+        async function reviseResearch() {
+            const feedback = document.getElementById('research-feedback').value;
+            await resumeExecution(feedback);
+        }
+
+        async function approveFinal() {
+            await resumeExecution();
+        }
+
+        async function reviseFinal() {
+            const feedback = document.getElementById('final-feedback').value;
+            await resumeExecution(feedback);
+        }
+
+        async function resumeExecution(feedback = null) {
+            try {
+                const response = await fetch('/api/demo2/resume', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        execution_id: currentExecutionId,
+                        feedback: feedback
+                    })
+                });
+
+                const result = await response.json();
+                if (result.status === 'success') {
+                    updateStepStatus('step2', 'running');
+                    startMonitoring();
+                } else {
+                    throw new Error(result.error || 'Failed to resume execution');
+                }
+            } catch (error) {
+                alert('Error resuming execution: ' + error.message);
+            }
+        }
+
+        function rejectExecution() {
+            if (confirm('Are you sure you want to reject this execution?')) {
+                alert('Execution rejected by user');
+                // Reset to step 1
+                showStep('step1');
+                updateStepStatus('step1', 'pending');
+                document.getElementById('start-execution').disabled = false;
+                document.getElementById('start-execution').innerHTML = '🚀 Start Content Pipeline';
+            }
+        }
+
+        function showStep(stepId) {
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.add('hidden');
+                step.classList.remove('active');
+            });
+            document.getElementById(stepId).classList.remove('hidden');
+            document.getElementById(stepId).classList.add('active');
+        }
+
+        function updateStepStatus(stepId, status) {
+            const statusElement = document.getElementById(stepId + '-status');
+            statusElement.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            statusElement.className = 'status-indicator status-' + status;
+        }
+
+        function formatOutput(output) {
+            if (typeof output === 'string') {
+                return output.replace(/\n/g, '<br>');
+            } else if (typeof output === 'object') {
+                return JSON.stringify(output, null, 2).replace(/\n/g, '<br>');
+            }
+            return output;
+        }
+
+        function downloadContent(format = 'markdown') {
+            const content = document.getElementById('completion-content').textContent;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `content.${format}`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function postToBlog() {
+            alert('Blog posting feature would be implemented here!\n\nThis would typically:\n1. Format the content for your blog platform\n2. Upload images and assets\n3. Set SEO metadata\n4. Publish the post');
+        }
+    </script>
+</body>
+</html>
+
+
