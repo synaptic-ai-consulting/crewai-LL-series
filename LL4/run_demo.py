@@ -48,11 +48,11 @@ def start_webhook_server():
     time.sleep(2)
     print("✅ Webhook server started on port 5000")
 
-def run_demo(demo_number, polling=False):
+def run_demo(demo_number):
     """Run a specific demo."""
     demo_scripts = {
         1: 'src/demo1_opensource_hitl.py',
-        2: 'src/demo2_enterprise_webhook_hitl.py',  # Default to polling CLI
+        2: 'src/demo2_amp_deploy_first.py',  # Config checker and setup instructions
         3: 'src/demo3_multi_agent_handoff.py'
     }
     
@@ -60,16 +60,12 @@ def run_demo(demo_number, polling=False):
         print(f"❌ Demo {demo_number} not found")
         return False
     
-    # For Demo 2, choose between webhook (launcher) or polling (CLI)
+    script_path = demo_scripts[demo_number]
+    
+    # Demo 2 just checks configuration and provides setup instructions
     if demo_number == 2:
-        if polling:
-            script_path = 'src/demo2_enterprise_webhook_hitl.py'
-            print("🔄 Using polling-based HITL (backup mode)")
-        else:
-            script_path = 'src/demo2_amp_deploy_first.py'
-            print("🔗 Using webhook-based HITL with full UI")
-    else:
-        script_path = demo_scripts[demo_number]
+        print("🔗 Demo 2: Enterprise AMP Deployment with HITL")
+        print("   This will check your configuration and provide setup instructions")
     
     if not os.path.exists(script_path):
         print(f"❌ Demo script not found: {script_path}")
@@ -92,9 +88,21 @@ def run_demo(demo_number, polling=False):
 def list_demos():
     """List available demos."""
     print("📋 Available Demos:")
-    print("1. Open Source HITL - Iterative refinement with human feedback in open source CrewAI")
-    print("2. Enterprise Webhook HITL - Multi-agent content pipeline with human gate approvals using CrewAI AMP")
-    print("3. Multi-Agent Workflow - Sequential agents with human gates")
+    print()
+    print("1. Open Source HITL")
+    print("   Local execution with basic human_input=True functionality")
+    print("   Uses: Python Flask webhook server")
+    print("   Best for: Development and testing")
+    print()
+    print("2. Enterprise AMP Deployment with HITL")
+    print("   Production-ready multi-agent content pipeline")
+    print("   Uses: CrewAI AMP, Node.js backend, React frontend, ngrok")
+    print("   Best for: Production deployments")
+    print("   Note: Requires separate setup (see LL4/README.md)")
+    print()
+    print("3. Multi-Agent Workflow")
+    print("   Sequential agents with human gates")
+    print("   Uses: Open source CrewAI")
     print()
     print("Usage: python run_demo.py --demo <number>")
 
@@ -144,8 +152,6 @@ def main():
     parser = argparse.ArgumentParser(description='CrewAI HITL Demo Runner')
     parser.add_argument('--demo', type=int, choices=[1, 2, 3], 
                        help='Run specific demo (1, 2, or 3)')
-    parser.add_argument('--polling', action='store_true',
-                       help='Use polling-based HITL instead of webhooks (Demo 2 only)')
     parser.add_argument('--list-demos', action='store_true',
                        help='List available demos')
     parser.add_argument('--validate', action='store_true',
@@ -184,21 +190,24 @@ def main():
             print("❌ Setup validation failed. Run with --setup to fix issues.")
             sys.exit(1)
         
-        # Only start webhook server for Demo 1 (Demo 2 has its own backend in demo2_amp_deploy_first.py)
+        # Only start webhook server for Demo 1
         if args.demo == 1:
             start_webhook_server()
             print(f"\n🌐 Webhook server running at: http://localhost:5000")
             print(f"🎯 Demo {args.demo} UI: http://localhost:5000/demo{args.demo}")
-        elif args.demo == 2 and not args.polling:
-            print(f"\n🌐 Demo 2 will start its own services (ngrok, backend, frontend)")
-            print(f"🎯 Frontend will be available at: http://localhost:3000")
+            print("\nPress Ctrl+C to stop the demo")
+        elif args.demo == 2:
+            print(f"\n📋 Demo 2 requires separate services:")
+            print(f"   1. ngrok tunnel")
+            print(f"   2. Node.js backend (demo2-backend)")
+            print(f"   3. React frontend (demo2-frontend)")
+            print(f"\n   See LL4/README.md for complete setup instructions")
         
-        print("\nPress Ctrl+C to stop the demo")
         print("=" * 60)
         
         try:
-            # Run the demo with polling flag
-            success = run_demo(args.demo, polling=args.polling)
+            # Run the demo
+            success = run_demo(args.demo)
             if success:
                 print(f"\n✅ Demo {args.demo} completed successfully!")
             else:
@@ -212,13 +221,13 @@ def main():
     else:
         print("🎯 CrewAI HITL Demos")
         print("\nAvailable commands:")
-        print("  python run_demo.py --demo 1           # Open Source HITL - Iterative Refinement")
-        print("  python run_demo.py --demo 2           # Enterprise Webhook HITL - Full UI (default)")
-        print("  python run_demo.py --demo 2 --polling # Enterprise HITL - Polling-based (backup)")
-        print("  python run_demo.py --demo 3           # Multi-Agent Workflow")
-        print("  python run_demo.py --list-demos       # List all demos")
-        print("  python run_demo.py --validate         # Validate setup")
-        print("  python run_demo.py --setup            # Setup environment")
+        print("  python run_demo.py --demo 1      # Open Source HITL - Local execution")
+        print("  python run_demo.py --demo 2      # Enterprise AMP HITL - Check config")
+        print("  python run_demo.py --demo 3      # Multi-Agent Workflow")
+        print("  python run_demo.py --list-demos  # List all demos")
+        print("  python run_demo.py --validate    # Validate setup")
+        print("  python run_demo.py --setup       # Setup environment")
+        print("\n💡 For Demo 2 full setup, see LL4/README.md")
 
 if __name__ == "__main__":
     main()

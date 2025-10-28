@@ -8,22 +8,63 @@ const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 const app = express();
-const PORT = process.env.WEBHOOK_PORT || 3001;
+const PORT = process.env.WEBHOOK_PORT || 5000;
 
 // Map env variables to what server.js expects
 const CREW_BASE_URL = process.env.CREW_BASE_URL;
 const CREW_BEARER_TOKEN = process.env.CREW_BEARER_TOKEN;
-const WEBHOOK_BASE_URL = process.env.WEBHOOK_BASE_URL || 'http://localhost:3001';
+const WEBHOOK_BASE_URL = process.env.WEBHOOK_BASE_URL;
 
-// Debug: Log loaded environment variables
-console.log('🔍 Environment Variables Loaded:');
-console.log(`   CREW_BASE_URL: ${process.env.CREW_BASE_URL ? '✅' : '❌ undefined'}`);
-console.log(`   CREW_BEARER_TOKEN: ${process.env.CREW_BEARER_TOKEN ? '✅' : '❌ undefined'}`);
-console.log(`   WEBHOOK_BASE_URL: ${process.env.WEBHOOK_BASE_URL || 'using default'}`);
+// Validation: Ensure required environment variables are set
+console.log('\n🔍 Environment Variables Validation:');
+const missingVars = [];
+
+if (!CREW_BASE_URL) {
+    console.log('   ❌ CREW_BASE_URL: undefined');
+    missingVars.push('CREW_BASE_URL');
+} else {
+    console.log(`   ✅ CREW_BASE_URL: ${CREW_BASE_URL}`);
+}
+
+if (!CREW_BEARER_TOKEN) {
+    console.log('   ❌ CREW_BEARER_TOKEN: undefined');
+    missingVars.push('CREW_BEARER_TOKEN');
+} else {
+    console.log(`   ✅ CREW_BEARER_TOKEN: ${CREW_BEARER_TOKEN.substring(0, 4)}...`);
+}
+
+if (!WEBHOOK_BASE_URL) {
+    console.log('   ❌ WEBHOOK_BASE_URL: undefined');
+    console.log('   ⚠️  WARNING: HITL webhooks require a PUBLIC URL (use ngrok)');
+    missingVars.push('WEBHOOK_BASE_URL');
+} else if (!WEBHOOK_BASE_URL.startsWith('https://')) {
+    console.log(`   ⚠️  WEBHOOK_BASE_URL: ${WEBHOOK_BASE_URL}`);
+    console.log('   ⚠️  WARNING: WEBHOOK_BASE_URL should be HTTPS (CrewAI AMP requires public HTTPS URLs)');
+} else {
+    console.log(`   ✅ WEBHOOK_BASE_URL: ${WEBHOOK_BASE_URL}`);
+}
+
+if (missingVars.length > 0) {
+    console.log('\n❌ CONFIGURATION ERROR:');
+    console.log('   Missing required environment variables:', missingVars.join(', '));
+    console.log('   Please create a .env file based on .env.example');
+    console.log('   Exiting...\n');
+    process.exit(1);
+}
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+
+// Debug: Log all incoming requests to diagnose webhook issues
+app.use((req, res, next) => {
+    const timestamp = new Date().toISOString();
+    console.log(`\n[${timestamp}] 📥 ${req.method} ${req.path}`);
+    if (req.path.includes('webhook') && req.body && Object.keys(req.body).length > 0) {
+        console.log('   Webhook payload keys:', Object.keys(req.body));
+    }
+    next();
+});
 
 // In-memory storage for executions (use database in production)
 const executions = new Map();
