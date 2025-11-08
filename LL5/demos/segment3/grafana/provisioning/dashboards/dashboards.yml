@@ -1,0 +1,12 @@
+apiVersion: 1
+providers:
+  - name: LL5 Dashboards
+    orgId: 1
+    folder: LL5
+    type: file
+    disableDeletion: false
+    options:
+      path: /var/lib/grafana/dashboards
+
+
+
