@@ -1,0 +1,17 @@
+---
+analyze_crewai_observability_features:
+  description: Summarize the latest CrewAI observability capabilities and tracing
+    features. Focus on why teams should enable tracing before production deployment.
+    Research the official CrewAI documentation and platform updates.
+  expected_output: Three bullet executive summary covering features, benefits, and
+    rollout tips for CrewAI observability and tracing
+  agent: research_analyst
+draft_executive_memo:
+  description: Turn the research summary into an internal memo for engineering leadership.
+    Include a recommended next step for adopting tracing in current crews. Structure
+    it as a professional memo with clear sections.
+  expected_output: One-page memo with an introduction, two key insights about CrewAI
+    observability, and a call to action for implementation
+  agent: content_synthesizer
+  context:
+  - analyze_crewai_observability_features

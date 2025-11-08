@@ -1,0 +1,7 @@
+crewai>=0.51.0
+crewai-tools>=0.5.0
+opentelemetry-sdk>=1.25.0
+opentelemetry-exporter-otlp>=1.25.0
+# Optional Langtrace client must be installed from source, see LL5 project docs.
+python-dotenv>=1.0.0
+
