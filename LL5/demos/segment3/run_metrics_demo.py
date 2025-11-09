@@ -5,6 +5,7 @@ Segment 3 demo: wire CrewAI task execution into OpenTelemetry.
 from __future__ import annotations
 
 import os
+import time
 from textwrap import dedent
 
 from crewai import Agent, Crew, Process, Task
@@ -64,26 +65,45 @@ def build_tasks(researcher: Agent, writer: Agent) -> tuple[Task, Task]:
 
 
 def main() -> None:
-    researcher, writer = build_agents()
-    analysis, draft = build_tasks(researcher, writer)
+    iterations = max(int(os.getenv("DEMO_RUN_ITERATIONS", "3")), 1)
+    delay_between_runs = max(float(os.getenv("DEMO_RUN_DELAY_SEC", "2.0")), 0.0)
+    flush_wait_seconds = max(float(os.getenv("DEMO_FLUSH_WAIT_SEC", "3.0")), 0.0)
 
-    crew = Crew(
-        agents=[researcher, writer],
-        tasks=[analysis, draft],
-        process=Process.sequential,
-        tracing=True,
-        verbose=True,
-    )
+    results: list[str] = []
 
-    result = crew.kickoff()
+    for iteration in range(1, iterations + 1):
+        researcher, writer = build_agents()
+        analysis, draft = build_tasks(researcher, writer)
 
-    print("\n=== Crew Result ===")
-    print(result)
+        crew = Crew(
+            agents=[researcher, writer],
+            tasks=[analysis, draft],
+            process=Process.sequential,
+            tracing=True,
+            verbose=True,
+        )
+
+        print(f"\n=== Crew Iteration {iteration}/{iterations} ===")
+        result = crew.kickoff()
+        results.append(str(result))
+
+        if delay_between_runs and iteration < iterations:
+            print(f"\nSleeping {delay_between_runs:.1f}s before next run to keep metrics streaming...")
+            time.sleep(delay_between_runs)
+
+    print("\n=== Crew Results (most recent last) ===")
+    for idx, output in enumerate(results, start=1):
+        print(f"\n--- Result {idx} ---\n{output}")
+
     if os.getenv("OTLP_ENDPOINT"):
         print(f"\nOTLP exports sent to: {os.getenv('OTLP_ENDPOINT')}")
     else:
         print("\nOTLP_ENDPOINT not set. Defaulting to http://localhost:4317.")
     print("Check your Grafana/Prometheus dashboards for latency + success metrics.")
+
+    if flush_wait_seconds:
+        print(f"\nWaiting {flush_wait_seconds:.1f}s to allow OpenTelemetry exporters to flush...")
+        time.sleep(flush_wait_seconds)
 
 
 if __name__ == "__main__":

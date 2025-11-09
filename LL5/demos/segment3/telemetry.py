@@ -36,6 +36,15 @@ from crewai.events.types.task_events import (
 
 OTLP_ENDPOINT = os.getenv("OTLP_ENDPOINT", "http://localhost:4317")
 
+
+def _grpc_target_and_security(url: str) -> tuple[str, bool]:
+    """Return (target, insecure) tuple compatible with OTLP gRPC exporters."""
+    if url.startswith("http://"):
+        return url.removeprefix("http://"), True
+    if url.startswith("https://"):
+        return url.removeprefix("https://"), False
+    return url, not url.startswith("https://")
+
 RESOURCE = Resource.create(
     {
         "service.name": os.getenv("OTEL_SERVICE_NAME", "ll5-demo-crew"),
@@ -45,10 +54,11 @@ RESOURCE = Resource.create(
 
 
 def _init_trace_provider() -> trace.Tracer:
+    target, insecure = _grpc_target_and_security(OTLP_ENDPOINT)
     provider = TracerProvider(resource=RESOURCE)
     provider.add_span_processor(
         BatchSpanProcessor(
-            OTLPSpanExporter(endpoint=OTLP_ENDPOINT, insecure=OTLP_ENDPOINT.startswith("http://"))
+            OTLPSpanExporter(endpoint=target, insecure=insecure)
         )
     )
     trace.set_tracer_provider(provider)
@@ -114,6 +124,7 @@ class CrewTelemetryBridge(BaseEventListener):
             duration = self._pop_duration(event)
 
             LATENCY_HISTOGRAM.record(duration, attributes)
+            print('DEBUG TELEMETRY span', attributes, duration)
             SUCCESS_COUNTER.add(1, attributes)
 
             with TRACER.start_as_current_span(
@@ -133,6 +144,7 @@ class CrewTelemetryBridge(BaseEventListener):
             duration = self._pop_duration(event)
 
             LATENCY_HISTOGRAM.record(duration, attributes)
+            print('DEBUG TELEMETRY span', attributes, duration)
             FAILURE_COUNTER.add(1, attributes)
 
             with TRACER.start_as_current_span(

@@ -8,17 +8,34 @@ services:
       - ./otel-collector-config.yaml:/etc/otelcol/otel-collector-config.yaml:ro
     ports:
       - "4317:4317"
-      - "4318:4318"
       - "8889:8889"
+    depends_on:
+      - tempo
+
+  tempo-init:
+    image: busybox:latest
+    user: root
+    entrypoint: ["chown", "10001:10001", "/var/tempo"]
+    volumes:
+      - tempo-data:/var/tempo
+
+  memcached:
+    image: memcached:1.6.38
+    command: ["-m", "64"]
+    ports:
+      - "11211:11211"
 
   tempo:
-    image: grafana/tempo:2.5.0
+    image: grafana/tempo:latest
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
       - ./tempo.yaml:/etc/tempo.yaml:ro
       - tempo-data:/var/tempo
     ports:
       - "3200:3200"
+    depends_on:
+      - tempo-init
+      - memcached
 
   prometheus:
     image: prom/prometheus:v2.54.1

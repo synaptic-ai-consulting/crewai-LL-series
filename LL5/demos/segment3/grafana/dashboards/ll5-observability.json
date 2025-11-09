@@ -71,7 +71,7 @@
             "type": "prometheus",
             "uid": "Prometheus"
           },
-          "expr": "histogram_quantile(0.90, sum(rate(crew_tasks_latency_ms_bucket[5m])) by (le, crew_task_name))",
+          "expr": "histogram_quantile(0.90, sum(increase(crew_tasks_latency_ms_milliseconds_bucket[1m])) by (le, crew_task_name))",
           "format": "time_series",
           "legendFormat": "p90 {{crew_task_name}}",
           "refId": "A"
@@ -81,7 +81,7 @@
             "type": "prometheus",
             "uid": "Prometheus"
           },
-          "expr": "histogram_quantile(0.50, sum(rate(crew_tasks_latency_ms_bucket[5m])) by (le, crew_task_name))",
+          "expr": "histogram_quantile(0.50, sum(increase(crew_tasks_latency_ms_milliseconds_bucket[1m])) by (le, crew_task_name))",
           "format": "time_series",
           "legendFormat": "p50 {{crew_task_name}}",
           "refId": "B"
@@ -152,7 +152,7 @@
             "type": "prometheus",
             "uid": "Prometheus"
           },
-          "expr": "sum(increase(crew_tasks_success_total[5m])) by (crew_task_name)",
+          "expr": "sum(increase(crew_tasks_success_total[1m])) by (crew_task_name)",
           "legendFormat": "{{crew_task_name}}",
           "refId": "A"
         }
@@ -162,14 +162,218 @@
     },
     {
       "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "text": "0"
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "expr": "sum(increase(crew_tasks_failure_total[1m])) by (crew_task_name) or vector(0)",
+          "legendFormat": "{{crew_task_name}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Task Failure Volume (1m)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "description": "Live throughput of completed tasks per minute.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "t/min"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 0,
+        "y": 18
+      },
+      "id": 5,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "10.4.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "expr": "sum(rate(crew_tasks_success_total[1m])) * 60",
+          "refId": "A"
+        }
+      ],
+      "title": "Task Throughput (per min)",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "schemeOranges"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 9
+      },
+      "id": 6,
+      "options": {
+        "color": {
+          "exponent": 0.5,
+          "mode": "opacity"
+        },
+        "legend": {
+          "show": false
+        },
+        "tooltip": {
+          "show": true,
+          "yHistogram": false
+        },
+        "xAxis": {
+          "show": true
+        },
+        "yAxis": {
+          "decimals": null,
+          "format": "none",
+          "logBase": 1,
+          "show": true
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "expr": "sum(increase(crew_tasks_latency_ms_milliseconds_bucket[1m])) by (le)",
+          "format": "heatmap",
+          "legendFormat": "{{le}}",
+          "refId": "A"
+        }
+      ],
+      "title": "Latency Distribution Heatmap",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
         "type": "tempo",
         "uid": "Tempo"
       },
       "gridPos": {
         "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 9
+        "w": 12,
+        "x": 6,
+        "y": 18
       },
       "id": 3,
       "options": {
@@ -179,13 +383,85 @@
               "type": "tempo",
               "uid": "Tempo"
             },
-            "query": "{service.name=\"ll5-demo-crew\"}",
+            "query": "{ resource.service.name = \"ll5-demo-crew\" }",
+            "queryType": "traceqlSearch",
             "refId": "A"
           }
-        ]
+        ],
+        "showField": "duration"
       },
       "title": "Recent Task Spans",
       "type": "traces"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "Prometheus"
+      },
+      "description": "Cumulative successes vs failures since collector start.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 10
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 18
+      },
+      "id": 7,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "expr": "sum(crew_tasks_success_total) by (crew_task_name)",
+          "legendFormat": "success {{crew_task_name}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "Prometheus"
+          },
+          "expr": "sum(crew_tasks_failure_total) by (crew_task_name)",
+          "legendFormat": "failure {{crew_task_name}}",
+          "refId": "B"
+        }
+      ],
+      "title": "Cumulative Task Outcomes",
+      "type": "timeseries"
     }
   ],
   "refresh": "5s",
