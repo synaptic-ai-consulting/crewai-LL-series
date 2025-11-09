@@ -55,13 +55,17 @@ RESOURCE = Resource.create(
 
 def _init_trace_provider() -> trace.Tracer:
     target, insecure = _grpc_target_and_security(OTLP_ENDPOINT)
-    provider = TracerProvider(resource=RESOURCE)
+    current_provider = trace.get_tracer_provider()
+    if isinstance(current_provider, TracerProvider):
+        provider = current_provider
+    else:
+        provider = TracerProvider(resource=RESOURCE)
+        trace.set_tracer_provider(provider)
     provider.add_span_processor(
         BatchSpanProcessor(
             OTLPSpanExporter(endpoint=target, insecure=insecure)
         )
     )
-    trace.set_tracer_provider(provider)
     return trace.get_tracer("ll5.segment3")
 
 

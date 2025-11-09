@@ -9,6 +9,7 @@ services:
     ports:
       - "4317:4317"
       - "8889:8889"
+      - "8888:8888"
     depends_on:
       - tempo
 
@@ -44,6 +45,7 @@ services:
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
       - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-remote-write-receiver"
     ports:
       - "9090:9090"
 
