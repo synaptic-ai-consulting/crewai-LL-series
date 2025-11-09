@@ -2,6 +2,12 @@
 
 This folder contains the runnable example for the Segment 3 lesson segment. It instruments CrewAI task events, exports spans/metrics over OTLP, and demonstrates how to watch latency + success metrics in Grafana/Prometheus.
 
+> **Lesson scope update**  
+> Lightning Lesson 5 now ships **two** demos only:  
+> - [Segment 2 · AMP Tracing Demo](../segment2/README.md) for first-look tracing.  
+> - **Segment 3 · OpenTelemetry Metrics Bridge** (this folder) for local metrics + traces.  
+> Any previously planned follow-on demos have been deferred, so focus setup and prep on these two artifacts.
+
 ## Architecture Overview
 
 ```mermaid
