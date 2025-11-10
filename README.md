@@ -117,15 +117,36 @@ The course covers:
 
 ```
 crewai-ll-series/
-├── LL1/                    # Lightning Lesson 1: Flows vs. Crews
-│   ├── src/               # Source code implementations
-│   ├── artifacts/         # Generated outputs and examples
-│   └── README.md          # Lesson-specific documentation
-├── LL2/                   # Lightning Lesson 2: Agent Personas
-├── LL3/                   # Lightning Lesson 3: Memory Architecture
-├── LL4/                   # Lightning Lesson 4: HITL Patterns
-├── LL5/                   # Lightning Lesson 5: Observability
-└── README.md              # This file
+├── docs/                          # Cross-lesson documentation and reference material
+├── LL1/                           # Lesson 1: Flows vs. Crews implementations
+│   ├── src/                       # Core lesson source code
+│   ├── artifacts/                 # Generated outputs and walkthrough artifacts
+│   ├── docs/                      # Lesson-specific notes and diagrams
+│   ├── test/                      # Automated checks for lesson components
+│   └── run_demo.py                # Entry point to run the lesson demo
+├── LL2/                           # Lesson 2: Agent Personas
+│   ├── config/                    # Crew and agent YAML configurations
+│   ├── prompts/                   # Persona prompt templates
+│   ├── src/                       # Implementation modules
+│   ├── test/                      # Validation suites
+│   └── run_demo.py
+├── LL3/                           # Lesson 3: Memory Architecture
+│   ├── storage/                   # Custom memory backends
+│   ├── templates/                 # Prompt and memory templates
+│   ├── src/
+│   └── test/
+├── LL4/                           # Lesson 4: Human-in-the-Loop Patterns
+│   ├── demo2-backend/             # Backend service for HITL demo
+│   ├── demo2-frontend/            # Frontend app for HITL workflows
+│   ├── demo2-studio-crew/         # Crew definitions for Studio demo
+│   ├── src/
+│   └── templates/
+├── LL5/                           # Lesson 5: Observability and Performance
+│   ├── demos/                     # Segment-specific observability demos
+│   ├── README.md                  # Lesson overview and setup notes
+│   ├── env.example                # Environment variables needed for demos
+│   └── requirements.txt
+└── README.md                      # Repository overview (this file)
 ```
 
 ## 🛠️ Getting Started
@@ -139,7 +160,7 @@ Each lightning lesson directory contains:
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.10+
 - CrewAI framework
 - Basic understanding of AI agents and multi-agent systems
 
@@ -187,5 +208,3 @@ This project is open source and available under the [MIT License](LICENSE).
 ---
 
 **Ready to master CrewAI?** Start with the lightning lessons, then dive deep with the complete course. Transform from building simple chatbots to architecting enterprise-grade multiagent systems that command premium consulting rates.
-
-*Each lesson follows the proven formula: hook with failure story, deliver tactical insights with live demos, provide screenshot-worthy frameworks, and maintain high energy with fast-paced delivery and constant interaction.*
