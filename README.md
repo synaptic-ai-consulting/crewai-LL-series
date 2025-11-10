@@ -82,6 +82,10 @@ The CrewAI Lightning Lessons Series focuses on **non-obvious, enterprise-grade c
 - ⚡ Implement Iterative Refinement Loops for Agent Improvement
 - ⚡ Architect Context-Aware Feedback Integration Systems
 
+**Resources**:
+- Recording: [Human-in-the-Loop Design Patterns Live Session](https://maven.com/p/a83305/human-in-the-loop-design-patterns?utm_medium=github_link)
+- Slides:[Human-in-the-Loop Design Patterns Slides](https://maven.com/p/7f9666/crew-ai-lightning-lesson-series-ll4?utm_medium=github_link)
+
 ---
 
 ### 5. **Advanced Observability and Performance** *(November 10th)*
@@ -97,6 +101,11 @@ The CrewAI Lightning Lessons Series focuses on **non-obvious, enterprise-grade c
 - ⚡ Implement Advanced Observability Beyond Basic Logging
 - ⚡ Build Predictive Performance Monitoring Systems
 - ⚡ Master Cost Optimization and Token Management Strategies
+
+**Resources**:
+- Recording: [Advanced Observability and Performance Live Session](https://maven.com/p/d98747/advanced-observability-and-performance?utm_medium=github_link)
+- Slides:[Advanced Observability and Performance Slides](https://maven.com/p/caa710/crew-ai-lightning-lesson-series-ll5?utm_medium=github_link)
+
 
 ## 🎥 Watch the Lightning Lessons
 
